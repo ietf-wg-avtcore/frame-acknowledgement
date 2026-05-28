@@ -5,15 +5,15 @@
 avtcore WG                                                     E. Språng
 Internet-Draft                                                    Google
 Intended status: Informational                             G. S. Chandok
-Expires: 14 September 2026                                         Apple
+Expires: 29 November 2026                                          Apple
                                                                S. Majali
                                                                   Nvidia
-                                                           13 March 2026
+                                                             28 May 2026
 
 
       RTCP Feedback Message and Request Mechanism for Frame-level
                             Acknowledgement
-             draft-sprang-avtcore-frame-acknowledgement-02
+              draft-ietf-avtcore-frame-acknowledgement-00
 
 Abstract
 
@@ -36,8 +36,8 @@ About This Document
    The latest revision of this draft can be found at
    https://github.com/sprangerik/frame-acknowledgement/blob/main/draft-
    sprang-avtcore-frame-acknowledgement.md.  Status information for this
-   document may be found at https://datatracker.ietf.org/doc/draft-
-   sprang-avtcore-frame-acknowledgement/.
+   document may be found at https://datatracker.ietf.org/doc/draft-ietf-
+   avtcore-frame-acknowledgement/.
 
    Discussion of this document takes place on the avtcore WG Working
    Group mailing list (mailto:avt@ietf.org), which is archived at
@@ -62,7 +62,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 14 September 2026.
+   This Internet-Draft will expire on 29 November 2026.
 
 Copyright Notice
 
