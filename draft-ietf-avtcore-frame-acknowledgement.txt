@@ -13,7 +13,7 @@ Expires: 29 November 2026                                          Apple
 
       RTCP Feedback Message and Request Mechanism for Frame-level
                             Acknowledgement
-              draft-ietf-avtcore-frame-acknowledgement-00
+              draft-ietf-avtcore-frame-acknowledgement-01
 
 Abstract
 
@@ -33,11 +33,11 @@ About This Document
 
    This note is to be removed before publishing as an RFC.
 
-   The latest revision of this draft can be found at
-   https://github.com/sprangerik/frame-acknowledgement/blob/main/draft-
-   sprang-avtcore-frame-acknowledgement.md.  Status information for this
-   document may be found at https://datatracker.ietf.org/doc/draft-ietf-
-   avtcore-frame-acknowledgement/.
+   The latest revision of this draft can be found at https://github.com/
+   ietf-wg-avtcore/frame-acknowledgement/blob/main/draft-ietf-avtcore-
+   frame-acknowledgement.md.  Status information for this document may
+   be found at https://datatracker.ietf.org/doc/draft-ietf-avtcore-
+   frame-acknowledgement/.
 
    Discussion of this document takes place on the avtcore WG Working
    Group mailing list (mailto:avt@ietf.org), which is archived at
@@ -45,7 +45,7 @@ About This Document
    https://www.ietf.org/mailman/listinfo/avt/.
 
    Source for this draft and an issue tracker can be found at
-   https://github.com/sprangerik/frame-acknowledgement.
+   https://github.com/ietf-wg-avtcore/frame-acknowledgement.
 
 Status of This Memo
 
