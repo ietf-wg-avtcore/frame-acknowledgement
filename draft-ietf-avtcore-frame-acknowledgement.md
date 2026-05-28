@@ -3,7 +3,7 @@ title: "RTCP Feedback Message and Request Mechanism for Frame-level Acknowledgem
 abbrev: "Video Frame Acknowledgement"
 category: info
 
-docname: draft-ietf-avtcore-frame-acknowledgement-00
+docname: draft-ietf-avtcore-frame-acknowledgement-01
 submissiontype: IETF
 number:
 date: 2026-05-28
@@ -22,8 +22,8 @@ venue:
   type: Working Group
   mail: avt@ietf.org
   arch: https://datatracker.ietf.org/wg/avtcore
-  github: sprangerik/frame-acknowledgement
-  latest: https://github.com/sprangerik/frame-acknowledgement/blob/main/draft-sprang-avtcore-frame-acknowledgement.md
+  github: ietf-wg-avtcore/frame-acknowledgement
+  latest: https://github.com/ietf-wg-avtcore/frame-acknowledgement/blob/main/draft-ietf-avtcore-frame-acknowledgement.md
 
 author:
  -
