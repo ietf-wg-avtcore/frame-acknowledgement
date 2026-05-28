@@ -103,7 +103,8 @@ Table of Contents
    8.  Frame ID considerations
      8.1.  Resync Request Handling
      8.2.  Point-to-Multi-Point
-     8.3.  Out-of-order Message Handling
+     8.3.  Using acknowledgement ranges
+     8.4.  Out-of-order Message Handling
    9.  SDP Signaling
      9.1.  RTP Header Extension
      9.2.  RTCP Feedback
@@ -289,9 +290,9 @@ Table of Contents
    acknowledgement header extension that is also used for frame
    identification.  The feedback request comprises a Start Frame ID and
    Length field.  Specifying the range explicitly has several
-   advantages, including enabling reliable delivery of the feedback
-   since the sender can effectively make retransmission requests of the
-   feedback.
+   advantages, including reliable delivery of the feedback and the
+   ability to signal state relating to multiple independent streams
+   interleaved within a single SSRC.
 
    If a new Frame Acknowledgement Request is sent with an incremented
    Feedback Start, all status values prior to that Frame ID are
@@ -522,7 +523,28 @@ Table of Contents
    should typically not acknowledge a frame to a sender unless all
    active receivers have acknowledged that frame.
 
-8.3.  Out-of-order Message Handling
+8.3.  Using acknowledgement ranges
+
+   The feedback request menchanism has the ability to respond with the
+   status of a range of Frame IDs, not just the last decoded Frame ID.
+   If video is encoded as a single dependency chain, the only the last
+   decoded Frame ID would likely be sufficient.  However, when spatial
+   scalability such as "simulcast" is employed the situation gets more
+   complex.
+
+   For instance, imaging the following scenario where two independent
+   layers are sent (with the numbers indicating frame timestamps and ID
+   being the Frame IDs): S1: 100 -> 101 (ID = 1) -> 102 -> 103 S0: 100
+   -> 101 -> 102 (ID = 2) -> 103 Here, if the feedback for Frame ID 1 is
+   lost, it is not enough to know that some receiver has been able to
+   decode Frame ID 2.  It is for this reason the sender can request
+   feedback starting at Frame ID 1, with a length of two.  The receiver
+   should never remove state information about frames prior to the
+   earliest Frame ID it has received a feedback request for.  This
+   guarantees that the sender is always able to acquire feedback for all
+   frames it has sent.
+
+8.4.  Out-of-order Message Handling
 
    Though rare, it is possible that Frame Acknowledgement Request header
    extensions are received out of order.  This can happen due to e.g.,
