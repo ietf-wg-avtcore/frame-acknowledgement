@@ -3,10 +3,10 @@ title: "RTCP Feedback Message and Request Mechanism for Frame-level Acknowledgem
 abbrev: "Video Frame Acknowledgement"
 category: info
 
-docname: draft-sprang-avtcore-frame-acknowledgement-02
+docname: draft-ietf-avtcore-frame-acknowledgement-00
 submissiontype: IETF
 number:
-date: 2026-03-13
+date: 2026-05-28
 consensus: true
 v: 3
 area: AREA
