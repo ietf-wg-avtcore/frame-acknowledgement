@@ -574,10 +574,11 @@ Table of Contents
    time.  As new Frame IDs are received, the window advances and the
    oldest entries are discarded.
 
-   A receiver MUST be prepared to maintain a status window of at least
-   255 frames.  A larger status window size MAY be negotiated via SDP
-   (see Status Window Size Signaling (Section 9.4)).  If no value is
-   negotiated, the default status window size is 255.
+   The default status window size is 255 frames.  A different status
+   window size MAY be negotiated via SDP (see Status Window Size
+   Signaling (Section 9.4)).  A receiver MUST be prepared to maintain a
+   status window of at least the negotiated size, or 255 if no value is
+   negotiated.
 
    When a new Frame ID is received that would cause the number of
    tracked Frame IDs to exceed the status window size, the receiver MUST
@@ -599,8 +600,7 @@ Table of Contents
    receives a feedback response with a Start Frame ID newer than what it
    requested or a Length of 0 SHOULD interpret this as an indication
    that the receiver has discarded state for the older frames and MUST
-   NOT use those older frames as references without re-establishing them
-   (e.g., via a keyframe).
+   NOT use those older frames as references.
 
    If the negotiated status window size exceeds 255 frames and the
    receiver needs to report status for more Frame IDs than a single
@@ -768,9 +768,9 @@ Table of Contents
    indefinitely.  Receivers MUST implement a status window as described
    in Receiver State Limits (Section 8.4) and discard state for older
    frames when this window is exceeded.  The maximum state a compliant
-   receiver will maintain is bounded by its status window size (default:
-   255 entries), which limits memory consumption to a small, predictable
-   amount regardless of sender behavior.
+   receiver will maintain is bounded by its status window size, which
+   limits memory consumption to a small, predictable amount regardless
+   of sender behavior.
 
 10.2.  Feedback Amplification
 
