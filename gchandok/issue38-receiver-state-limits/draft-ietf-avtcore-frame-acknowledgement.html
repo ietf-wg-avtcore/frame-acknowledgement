@@ -12,28 +12,29 @@
        This document describes a mechanism for signaling which video frames have been received and decoded by a remote peer. It comprises an RTCP feedback message and an RTP header extension used to request said feedback. 
        One of the main use cases for this data is to implement various forms of Long Term Reference (LTR) reference structures. Additionally, the mechanism provides a way for receivers to request resynchronization frames that reference acknowledged frames, enabling efficient recovery from partial or full frame loss without requiring a full keyframe. 
     " name="description">
-<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="xml2rfc 3.34.0" name="generator">
 <meta content="RTP" name="keyword">
 <meta content="RTCP" name="keyword">
 <meta content="Header Extension" name="keyword">
 <meta content="Video" name="keyword">
 <meta content="LTR" name="keyword">
-<meta content="draft-sprang-avtcore-frame-acknowledgement-02" name="ietf.draft">
+<meta content="draft-ietf-avtcore-frame-acknowledgement-01" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.31.0
-    Python 3.12.12
-    ConfigArgParse 1.7
+  xml2rfc 3.34.0
+    Python 3.14.5
+    ConfigArgParse 1.7.5
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
-    lxml 6.0.2
-    platformdirs 4.5.1
+    lxml 6.1.1
+    natsort 8.4.0
+    platformdirs 4.10.0
     pycountry 24.6.1
     PyYAML 6.0.3
-    requests 2.32.5
-    wcwidth 0.3.0
+    requests 2.33.1
+    wcwidth 0.8.1
 -->
-<link href="draft-sprang-avtcore-frame-acknowledgement.xml" rel="alternate" type="application/rfc+xml">
+<link href="draft-ietf-avtcore-frame-acknowledgement.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
 <style type="text/css">@font-face {
   font-family: 'Lora';
@@ -298,16 +299,19 @@ h1, h2, h3, h4, h5, h6 {
   font-size-adjust: 0.5;
   color: var(--title-color);
 }
-h1#title {
-  font-size: 32px;
-  line-height: 40px;
-  clear: both;
-}
-h1#title, h1#rfcnum {
-  margin: 1.5em 0 0.2em;
-}
-h1#rfcnum + h1#title {
-  margin: 0.2em 0;
+h1 {
+  &#title {
+    font-size: 32px;
+    line-height: 40px;
+    clear: both;
+    margin: 1.5em 0 0.2em;
+  }
+  &#rfcnum {
+    margin: 1.5em 0 0.2em;
+    & + h1#title {
+      margin: 0.2em 0;
+    }
+  }
 }
 
 h1, h2, h3 {
@@ -327,10 +331,10 @@ h4, h5, h6 {
 #abstract+p {
   font-size: 18px;
   line-height: 24px;
-}
-#abstract+p code, #abstract+p samp, #abstract+p tt {
-  font-size: 16px;
-  line-height: 0;
+  & code, & samp, & tt {
+    font-size: 16px;
+    line-height: 0;
+  }
 }
 
 p {
@@ -341,59 +345,59 @@ p {
 div {
   margin: 0;
 }
-.alignRight.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignRight.art-text pre {
-  padding: 0;
-  width: auto;
-}
 .alignRight {
   margin: 1em 0;
-}
-.alignRight > *:first-child {
-  border: none;
-  margin: 0;
-  float: right;
-  clear: both;
-}
-.alignRight > *:nth-child(2) {
-  clear: both;
-  display: block;
-  border: none;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    margin: 0;
+    float: right;
+    clear: both;
+  }
+  & > *:nth-child(2) {
+    clear: both;
+    display: block;
+    border: none;
+  }
 }
 svg {
   display: block;
-}
-/* font-family isn't space-separated, but =~ will have to do */
-svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
-  font-family: var(--font-mono);
-}
-.alignCenter.art-text {
-  background-color: var(--highlight-color);
-  border: 1px solid var(--line-color);
-  border-radius: 3px;
-  padding: 0.5em 1em 0;
-  margin-bottom: 0.5em;
-}
-.alignCenter.art-text pre {
-  padding: 0;
-  width: auto;
+  /* font-family isn't space-separated, but =~ will have to do */
+  &[font-family~="monospace" i], & [font-family~="monospace" i] {
+    font-family: var(--font-mono);
+  }
 }
 .alignCenter {
   margin: 1em 0;
-}
-.alignCenter > *:first-child {
-  border: none;
-  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
-     support flexbox yet.
-  */
-  display: table;
-  margin: 0 auto;
+  &.art-text {
+    background-color: var(--highlight-color);
+    border: 1px solid var(--line-color);
+    border-radius: 3px;
+    padding: 0.5em 1em 0;
+    margin-bottom: 0.5em;
+    & pre {
+      padding: 0;
+      width: auto;
+    }
+  }
+  & > *:first-child {
+    border: none;
+    /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+       support flexbox yet.
+    */
+    display: table;
+    margin: 0 auto;
+  }
 }
 
 /* lists */
@@ -431,26 +435,25 @@ dl {
     --indent: 5ch;
     & > dt {
       min-width: calc(var(--indent) - 2ch);
+      float: none;
     }
-  }
-  &.olPercent > dt {
-    float: none;
   }
 
   dl > dd > & {
     margin-top: 0.5em;
     margin-bottom: 0;
   }
-}
-dl:not(.dlNewline) > dt {
-  float: left;
-  margin-right: 2ch;
-  min-width: 8ch;
-}
-dl > dd {
-  margin-bottom: .8em;
-  margin-left: var(--indent) !important; /* stupid element overrides */
-  min-height: 2ex;
+
+  &:not(.dlNewline) > dt {
+    float: left;
+    margin-right: 2ch;
+    min-width: 8ch;
+  }
+  & > dd {
+    margin-bottom: .8em;
+    margin-left: var(--indent) !important; /* stupid element overrides */
+    min-height: 2ex;
+  }
 }
 :is(dl.compact, .dlCompact) > dd {
   margin-bottom: 0;
@@ -466,20 +469,22 @@ dl > dd {
 }
 
 /* links */
-a, a[href].selfRef:hover {
+a {
   text-decoration: none;
+  &[href] {
+    color: var(--link-color);
+    &:hover { text-decoration: underline; }
+    &.selfRef {
+      color: var(--text-color);
+      &:hover {
+        text-decoration: none;
+        background-color: var(--highlight-color);
+      }
+    }
+  }
 }
-a[href] {
-  color: var(--link-color);
-}
-a[href].selfRef, .iref + a[href].internal {
+.iref + a[href].internal {
   color: var(--text-color);
-}
-a[href]:hover {
-  text-decoration: underline;
-}
-a[href].selfRef:hover {
-  background-color: var(--highlight-color);
 }
 a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
   white-space: nowrap;
@@ -515,9 +520,9 @@ img {
 figure {
   margin: 0.5em 0;
   padding: 0;
-}
-figure blockquote {
-  margin: 0.8em 0.4em 0.4em;
+  & blockquote {
+    margin: 0.8em 0.4em 0.4em;
+  }
 }
 figcaption, caption {
   font-style: italic;
@@ -527,17 +532,19 @@ figcaption, caption {
 }
 @media screen {
   /* Auto-collapse boilerplate. */
-  :is(#status-of-memo, #copyright) p {
-    margin: -2px 0;
-    max-height: 0;
-    transition: max-height 2s ease, margin 0.5s ease 0.5s;
-    overflow: hidden;
-  }
-  :is(#status-of-memo, #copyright):hover p,
-  :is(#status-of-memo, #copyright) h2:target ~ p {
-    margin: 0.5em 0;
-    max-height: 500px;
-    overflow: auto;
+  :is(#status-of-memo, #copyright) {
+    & p {
+      margin: -2px 0;
+      max-height: 0;
+      transition: max-height 2s ease, margin 0.5s ease 0.5s;
+      overflow: hidden;
+    }
+    &:hover p,
+    & h2:target ~ p {
+      margin: 0.5em 0;
+      max-height: 500px;
+      overflow: auto;
+    }
   }
   pre, svg {
     display: inline-block;
@@ -587,25 +594,17 @@ table {
   max-width: 100%;
   margin: 0 0 1em;
   border-collapse: collapse;
-}
-table.right {
-  margin-left: auto;
-}
-table.center {
-  margin-left: auto;
-  margin-right: auto;
-}
-table.left {
-  margin-right: auto;
-}
-table .text-left {
-  text-align: left;
-}
-table .text-center {
-  text-align: center;
-}
-table .text-right {
-  text-align: right;
+  &.right { margin-left: auto; }
+  &.center { margin-left: auto; margin-right: auto; }
+  &.left { margin-right: auto; }
+  & .text-left { text-align: left; }
+  & .text-center { text-align: center; }
+  & .text-right { text-align: right; }
+  & caption {
+    margin: 0;
+    padding: 3px 0 3px 1em;
+  }
+  & p { margin: 0; }
 }
 
 thead, tbody {
@@ -625,13 +624,6 @@ th {
 :is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
   background-color: var(--highlight-color);
 }
-table caption {
-  margin: 0;
-  padding: 3px 0 3px 1em;
-}
-table p {
-  margin: 0;
-}
 
 /* pilcrow */
 a.pilcrow {
@@ -642,18 +634,16 @@ a.pilcrow {
     color: var(--pilcrow-weak);
     &:hover { text-decoration: none; }
   }
-}
-@media not print {
-  :hover > a.pilcrow, a.pilcrow:focus {
-    opacity: 1;
+  @media not print {
+    :hover > &, &:focus {
+      opacity: 1;
+    }
+    &[href]:hover {
+      color: var(--pilcrow-strong);
+      background-color: transparent;
+    }
   }
-  a.pilcrow[href]:hover {
-    color: var(--pilcrow-strong);
-    background-color: transparent;
-  }
-}
-@media print {
-  a.pilcrow {
+  @media print {
     display: none;
   }
 }
@@ -712,9 +702,9 @@ sub, sup {
   font-size: 0.9em;
   font-style: italic;
   margin-top: 2em;
-}
-.docInfo .prepared {
-  float: right;
+  & .prepared {
+    float: right;
+  }
 }
 
 /* table of contents */
@@ -804,23 +794,27 @@ hr.addr {
   max-width: calc(100% - 16px);
 }
 @media (min-width: 500px) {
-  #authors-addresses > section {
-    column-count: 2;
-    column-gap: 20px;
-  }
-  #authors-addresses > section > h2 {
-    column-span: all;
-  }
-  /* hack for break-inside: avoid-column */
-  #authors-addresses address {
-    display: inline-block;
-    break-inside: avoid-column;
+  #authors-addresses {
+    & > section {
+      column-count: 2;
+      column-gap: 20px;
+    }
+    & > section > h2 {
+      column-span: all;
+    }
+    /* hack for break-inside: avoid-column */
+    & address {
+      display: inline-block;
+      break-inside: avoid-column;
+    }
   }
 }
 
 /* Comments */
-.rfcEditorRemove p:first-of-type {
-  font-style: italic;
+.rfcEditorRemove {
+  & p:first-of-type {
+    font-style: italic;
+  }
 }
 .cref {
   background-color: rgba(249, 232, 105, 0.3);
@@ -831,19 +825,21 @@ hr.addr {
 }
 
 @media screen {
-  #toc nav {
-    font-family: var(--font-title);
-    font-weight: 360;
-    & > ul { margin-bottom: 2em; }
-    & ul {
-      margin: 0 0 0 4px;
-      & :is(p, li) {
-        margin: 2px 0;
+  #toc {
+    & nav {
+      font-family: var(--font-title);
+      font-weight: 360;
+      & > ul { margin-bottom: 2em; }
+      & ul {
+        margin: 0 0 0 4px;
+        & :is(p, li) {
+          margin: 2px 0;
+        }
       }
     }
-  }
-  #toc a.toplink {
-    float: right;
+    & a.toplink {
+      float: right;
+    }
   }
 }
 @media not screen {
@@ -864,54 +860,54 @@ hr.addr {
     margin: 0;
     border-bottom: 1px solid #ccc;
     opacity: 0.6;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 2px 0 2px 6px;
-    padding-right: 1em;
-    font-size: 18px;
-    line-height: 24px;
-    min-width: 190px;
-    text-align: right;
-    background-color: #444;
-    color: white;
-    cursor: pointer;
-    &::before { /* css hamburger */
-      float: right;
-      position: relative;
-      width: 1em;
-      height: 1px;
-      left: -164px;
-      margin: 8px 0 0 0;
-      background: white none repeat scroll 0 0;
-      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
-      content: "";
+    & h2 {
+      margin: 0;
+      padding: 2px 0 2px 6px;
+      padding-right: 1em;
+      font-size: 18px;
+      line-height: 24px;
+      min-width: 190px;
+      text-align: right;
+      background-color: #444;
+      color: white;
+      cursor: pointer;
+      &::before { /* css hamburger */
+        float: right;
+        position: relative;
+        width: 1em;
+        height: 1px;
+        left: -164px;
+        margin: 8px 0 0 0;
+        background: white none repeat scroll 0 0;
+        box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+        content: "";
+      }
     }
-  }
-  #toc nav {
-    display: none;
-    background-color: var(--background-color);
-    padding: 0.5em 1em 1em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    height: calc(100vh - 48px);
-    border-left: 1px solid #ddd;
-  }
-  #toc.active {
-    opacity: 1;
-    & nav { display: block; }
-  }
-  /* Make the collapsed ToC header render white on gray also when it's a link */
-  #toc h2 a,
-  #toc h2 a:is(:link, :focus, :hover),
-  #toc a.toplink,
-  #toc a.toplink:hover {
-    color: white;
-    background-color: #444;
-    text-decoration: none;
-  }
-  #toc a.toplink {
-    margin: 2px 0.5em 0;
+    & nav {
+      display: none;
+      background-color: var(--background-color);
+      padding: 0.5em 1em 1em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      height: calc(100vh - 48px);
+      border-left: 1px solid #ddd;
+    }
+    &.active {
+      opacity: 1;
+      & nav { display: block; }
+    }
+    /* Make the collapsed ToC header render white on gray also when it's a link */
+    & h2 a,
+    & h2 a:is(:link, :focus, :hover),
+    & a.toplink,
+    & a.toplink:hover {
+      color: white;
+      background-color: #444;
+      text-decoration: none;
+    }
+    & a.toplink {
+      margin: 2px 0.5em 0;
+    }
   }
 }
 
@@ -930,26 +926,26 @@ hr.addr {
     margin: 0;
     padding: 0;
     z-index: 1;
-  }
-  #toc h2 {
-    margin: 0;
-    padding: 0.25em 1em 1em 0;
-  }
-  #toc nav {
-    display: block;
-    height: calc(90vh - 84px);
-    bottom: 0;
-    padding: 0.5em 0 2em;
-    overflow: auto;
-    overscroll-behavior: contain;
-    scrollbar-width: thin;
+    & h2 {
+      margin: 0;
+      padding: 0.25em 1em 1em 0;
+    }
+    & nav {
+      display: block;
+      height: calc(90vh - 84px);
+      bottom: 0;
+      padding: 0.5em 0 2em;
+      overflow: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+    }
+    & a.toplink {
+      margin: 8px 0.5em 0;
+    }
   }
   img { /* future proofing */
     max-width: 100%;
     height: auto;
-  }
-  #toc a.toplink {
-    margin: 8px 0.5em 0;
   }
 }
 
@@ -965,12 +961,13 @@ hr.addr {
   #n-copyright-notice {
     border-bottom: none;
   }
-  #toc, #n-introduction {
-    page-break-before: always;
-  }
   #toc {
+    page-break-before: always;
     border-top: none;
     padding-top: 0;
+  }
+  #n-introduction {
+    page-break-before: always;
   }
   figure, pre, .vcard {
     page-break-inside: avoid;
@@ -1032,17 +1029,19 @@ hr.addr {
 }
 
 /* SVG Trick: a prefix match works because only black and white are allowed */
-svg :is([stroke="black"], [stroke^="#000"]) {
-  stroke: var(--text-color);
-}
-svg :is([stroke="white"], [stroke^="#fff"]) {
-  stroke: var(--background-color);
-}
-svg :is([fill="black"], [fill^="#000"], :not([fill])) {
-  fill: var(--text-color);
-}
-svg :is([fill="white"], [fill^="#fff"]) {
-  fill: var(--background-color);
+svg {
+  & :is([stroke="black"], [stroke^="#000"]) {
+    stroke: var(--text-color);
+  }
+  & :is([stroke="white"], [stroke^="#fff"]) {
+    stroke: var(--background-color);
+  }
+  & :is([fill="black"], [fill^="#000"], :not([fill])) {
+    fill: var(--text-color);
+  }
+  & :is([fill="white"], [fill^="#fff"]) {
+    fill: var(--background-color);
+  }
 }
 </style>
 
@@ -1052,11 +1051,11 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Video Frame Acknowledgement</td>
-<td class="right">March 2026</td>
+<td class="right">May 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Språng, et al.</td>
-<td class="center">Expires 4 September 2026</td>
+<td class="center">Expires 29 November 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1066,15 +1065,15 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dt class="label-workgroup">Workgroup:</dt>
 <dd class="workgroup">avtcore WG</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-sprang-avtcore-frame-acknowledgement-02</dd>
+<dd class="internet-draft">draft-ietf-avtcore-frame-acknowledgement-01</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-03-03" class="published">3 March 2026</time>
+<time datetime="2026-05-28" class="published">28 May 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-09-04">4 September 2026</time></dd>
+<dd class="expires"><time datetime="2026-11-29">29 November 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1104,15 +1103,15 @@ svg :is([fill="white"], [fill^="#fff"]) {
       </h2>
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
-        The latest revision of this draft can be found at <span><a href="https://github.com/sprangerik/frame-acknowledgement/blob/main/draft-sprang-avtcore-frame-acknowledgement.md">https://github.com/sprangerik/frame-acknowledgement/blob/main/draft-sprang-avtcore-frame-acknowledgement.md</a></span>.
-        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-sprang-avtcore-frame-acknowledgement/">https://datatracker.ietf.org/doc/draft-sprang-avtcore-frame-acknowledgement/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+        The latest revision of this draft can be found at <span><a href="https://github.com/ietf-wg-avtcore/frame-acknowledgement/blob/main/draft-ietf-avtcore-frame-acknowledgement.md">https://github.com/ietf-wg-avtcore/frame-acknowledgement/blob/main/draft-ietf-avtcore-frame-acknowledgement.md</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-ietf-avtcore-frame-acknowledgement/">https://datatracker.ietf.org/doc/draft-ietf-avtcore-frame-acknowledgement/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">
         Discussion of this document takes place on the
         avtcore WG Working Group mailing list (<span><a href="mailto:avt@ietf.org">mailto:avt@ietf.org</a></span>),
         which is archived at <span><a href="https://datatracker.ietf.org/wg/avtcore">https://datatracker.ietf.org/wg/avtcore</a></span>.
         Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/avt/">https://www.ietf.org/mailman/listinfo/avt/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
 <p id="section-note.1-4">Source for this draft and an issue tracker can be found at
-        <span><a href="https://github.com/sprangerik/frame-acknowledgement">https://github.com/sprangerik/frame-acknowledgement</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+        <span><a href="https://github.com/ietf-wg-avtcore/frame-acknowledgement">https://github.com/ietf-wg-avtcore/frame-acknowledgement</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
 </section>
 <div id="status-of-memo">
 <section id="section-boilerplate.1">
@@ -1133,7 +1132,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 4 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 29 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1240,52 +1239,83 @@ svg :is([fill="white"], [fill^="#fff"]) {
                 <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-point-to-multi-point" class="internal xref">Point-to-Multi-Point</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
-                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-out-of-order-message-handli" class="internal xref">Out-of-order Message Handling</a></p>
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-using-acknowledgement-range" class="internal xref">Using acknowledgement ranges</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-receiver-state-limits" class="internal xref">Receiver State Limits</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.5">
+                <p id="section-toc.1-1.8.2.5.1"><a href="#section-8.5" class="auto internal xref">8.5</a>.  <a href="#name-out-of-order-message-handli" class="internal xref">Out-of-order Message Handling</a></p>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
-            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
-            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
-</li>
-          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
-            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-references" class="internal xref">References</a></p>
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="auto internal xref">9</a>.  <a href="#name-sdp-signaling" class="internal xref">SDP Signaling</a></p>
 <ul class="compact toc ulBare ulEmpty">
-<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.1">
-                <p id="section-toc.1-1.11.2.1.1"><a href="#section-11.1" class="auto internal xref">11.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.1">
+                <p id="section-toc.1-1.9.2.1.1"><a href="#section-9.1" class="auto internal xref">9.1</a>.  <a href="#name-rtp-header-extension" class="internal xref">RTP Header Extension</a></p>
 </li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11.2.2">
-                <p id="section-toc.1-1.11.2.2.1"><a href="#section-11.2" class="auto internal xref">11.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.2">
+                <p id="section-toc.1-1.9.2.2.1"><a href="#section-9.2" class="auto internal xref">9.2</a>.  <a href="#name-rtcp-feedback" class="internal xref">RTCP Feedback</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
+                <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-receiver-triggered-resync" class="internal xref">Receiver-Triggered Resync</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-status-window-size-signalin" class="internal xref">Status Window Size Signaling</a></p>
 </li>
             </ul>
 </li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-state-exhaustion" class="internal xref">State Exhaustion</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-feedback-amplification" class="internal xref">Feedback Amplification</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12">
-            <p id="section-toc.1-1.12.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-appendix-a-example-flows" class="internal xref">Appendix A: Example Flows</a></p>
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="auto internal xref">12</a>. <a href="#name-references" class="internal xref">References</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.1">
-                <p id="section-toc.1-1.12.2.1.1"><a href="#appendix-A.1" class="auto internal xref"></a><a href="#name-notation-legend" class="internal xref">Notation Legend</a></p>
+                <p id="section-toc.1-1.12.2.1.1"><a href="#section-12.1" class="auto internal xref">12.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.2">
-                <p id="section-toc.1-1.12.2.2.1"><a href="#appendix-A.2" class="auto internal xref"></a><a href="#name-normal-operation-flow" class="internal xref">Normal Operation Flow</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.3">
-                <p id="section-toc.1-1.12.2.3.1"><a href="#appendix-A.3" class="auto internal xref"></a><a href="#name-sender-side-recovery-from-f" class="internal xref">Sender-side Recovery From Frame Loss</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.4">
-                <p id="section-toc.1-1.12.2.4.1"><a href="#appendix-A.4" class="auto internal xref"></a><a href="#name-receiver-triggered-resync-r" class="internal xref">Receiver-Triggered Resync Request</a></p>
-</li>
-              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.12.2.5">
-                <p id="section-toc.1-1.12.2.5.1"><a href="#appendix-A.5" class="auto internal xref"></a><a href="#name-feedback-loss-and-recovery" class="internal xref">Feedback Loss and Recovery</a></p>
+                <p id="section-toc.1-1.12.2.2.1"><a href="#section-12.2" class="auto internal xref">12.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
 </li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13">
-            <p id="section-toc.1-1.13.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+            <p id="section-toc.1-1.13.1"><a href="#appendix-A" class="auto internal xref"></a><a href="#name-appendix-a-example-flows" class="internal xref">Appendix A: Example Flows</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.1">
+                <p id="section-toc.1-1.13.2.1.1"><a href="#appendix-A.1" class="auto internal xref"></a><a href="#name-notation-legend" class="internal xref">Notation Legend</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.2">
+                <p id="section-toc.1-1.13.2.2.1"><a href="#appendix-A.2" class="auto internal xref"></a><a href="#name-normal-operation-flow" class="internal xref">Normal Operation Flow</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.3">
+                <p id="section-toc.1-1.13.2.3.1"><a href="#appendix-A.3" class="auto internal xref"></a><a href="#name-sender-side-recovery-from-f" class="internal xref">Sender-side Recovery From Frame Loss</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.4">
+                <p id="section-toc.1-1.13.2.4.1"><a href="#appendix-A.4" class="auto internal xref"></a><a href="#name-receiver-triggered-resync-r" class="internal xref">Receiver-Triggered Resync Request</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.13.2.5">
+                <p id="section-toc.1-1.13.2.5.1"><a href="#appendix-A.5" class="auto internal xref"></a><a href="#name-feedback-loss-and-recovery" class="internal xref">Feedback Loss and Recovery</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+            <p id="section-toc.1-1.14.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#appendix-C" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
 </li>
         </ul>
 </nav>
@@ -1405,7 +1435,7 @@ It <span class="bcp14">SHOULD</span> appear on the last packet of a video frame,
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-frame-acknowledgment-reques" class="section-name selfRef">Frame Acknowledgment Request</a>
         </h3>
 <p id="section-6.2-1">In order to get feedback on the state of the remote decoder, the sender actively requests such feedback using the same frame acknowledgement header extension that is also used for frame identification.
-The feedback request comprises a Start Frame ID and Length field. Specifying the range explicitly has several advantages, including enabling reliable delivery of the feedback since the sender can effectively make retransmission requests of the feedback.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+The feedback request comprises a Start Frame ID and Length field. Specifying the range explicitly has several advantages, including reliable delivery of the feedback and the ability to signal state relating to multiple independent streams interleaved within a single SSRC.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2">If a new Frame Acknowledgement Request is sent with an incremented Feedback Start, all status values prior to that Frame ID are considered as acknowledged and can be culled by the receiver. A sender <span class="bcp14">MUST NOT</span> request feedback prior to either the last acknowledged Frame ID or the start of the stream.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1482,7 +1512,7 @@ This implies both a frame marking with Frame ID and an independent feedback requ
 <a href="#section-6.3.2" class="section-number selfRef">6.3.2. </a><a href="#name-frame-id-16-bits" class="section-name selfRef">Frame ID (16 bits)</a>
           </h4>
 <p id="section-6.3.2-1">Present if FFR is 00, 01, or 10.
-An unsigned integer that uniquely identifies a frame. It <span class="bcp14">MUST</span> be incremented by one for each new frame (in sending order) that needs to be identified. It wraps around to 0 on overflow.<a href="#section-6.3.2-1" class="pilcrow">¶</a></p>
+An unsigned integer that uniquely identifies a frame. It <span class="bcp14">MUST</span> be incremented by one for each new frame (in sending order) that needs to be identified. It wraps around to 0 on overflow. The sender <span class="bcp14">MAY</span> start at 0, but receivers <span class="bcp14">MUST</span> accept any arbitrary starting point value.<a href="#section-6.3.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="feedback-start-16-bits">
@@ -1570,7 +1600,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
         <h3 id="name-length-8-bits">
 <a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-length-8-bits" class="section-name selfRef">Length (8 bits)</a>
         </h3>
-<p id="section-7.3-1">An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback information is present, though this <span class="bcp14">SHOULD NOT</span> be sent.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-1">An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback entries are present (e.g., when the requested range has no overlap with the receiver's status window, see <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>).<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="status-vector-variable-length">
@@ -1591,8 +1621,10 @@ An unsigned integer that indicates the number of consecutive frames the sender i
       <h2 id="name-frame-id-considerations">
 <a href="#section-8" class="section-number selfRef">8. </a><a href="#name-frame-id-considerations" class="section-name selfRef">Frame ID considerations</a>
       </h2>
-<p id="section-8-1">As stated above, the sender <span class="bcp14">MUST</span> increment the Frame ID by one for each new frame with the Frame Acknowledgement header extension present, in sending order. More than that, it must make sure that no wrap-around ambiguity can occur.
-Since feedback is only really necessary for frames which the codec stores in a reference buffer pending future use, the number of outstanding frames is in practice limited by the number of available reference buffers. E.g. for AV1, the upper limit will be 8. Although the optimal behavior will be application dependent, it is often advisable to spread reference buffer usage out across an RTT and to cull earlier buffer usage once later frames have been acknowledged.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-1">As stated above, the sender <span class="bcp14">MUST</span> increment the Frame ID by one for each new frame with the Frame Acknowledgement header extension present, in sending order. More than that, it must make sure that no wrap-around ambiguity can occur.<a href="#section-8-1" class="pilcrow">¶</a></p>
+<p id="section-8-2">Since feedback is only really necessary for frames which the codec stores in a reference buffer pending future use, the number of outstanding frames is in practice limited by the number of available reference buffers. E.g. for AV1, the upper limit will be 8. Although the optimal behavior will be application dependent, it is often advisable to spread reference buffer usage out across an RTT and to cull earlier buffer usage once later frames have been acknowledged.<a href="#section-8-2" class="pilcrow">¶</a></p>
+<p id="section-8-3">Also note that no exceptions are made for keyframes. I.e. keyframes may or may not be assigned a Frame ID, and any frames preceding a keyframe must still be inlcuded in the feedback if requested by the media sender - despite the keyframe being a new recovery point.<a href="#section-8-3" class="pilcrow">¶</a></p>
+<p id="section-8-4">The Frame ID sequence (and consequently the feedback messages corresponding to it) is unique per sender/receiver SSRC pair. Thus if a sender or receiver SSRC is changed, a new Frame ID sequence is started and all previous state is discarded. Otherwise no gaps or resets in the Frame ID sequence are allowed.<a href="#section-8-4" class="pilcrow">¶</a></p>
 <div id="resync-request-handling">
 <section id="section-8.1">
         <h3 id="name-resync-request-handling">
@@ -1614,43 +1646,171 @@ Since feedback is only really necessary for frames which the codec stores in a r
 <p id="section-8.2-1">When considering a multi-way application with an SFU/SFM-type relay in the middle, the middlebox may need to do translations/rewriting of Frame IDs such that the outgoing FrameIDs from a middlebox to a receiver still fulfill the requirement that the FrameIDs are incremented by one for each new frame that is marked for feedback. This must be true even if independent video streams for different senders are multiplexed onto the same SSRC. Further the middlebox should typically not acknowledge a frame to a sender unless all active receivers have acknowledged that frame.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="out-of-order-message-handling">
+<div id="using-acknowledgement-ranges">
 <section id="section-8.3">
-        <h3 id="name-out-of-order-message-handli">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
+        <h3 id="name-using-acknowledgement-range">
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-using-acknowledgement-range" class="section-name selfRef">Using acknowledgement ranges</a>
         </h3>
-<p id="section-8.3-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-1">The feedback request menchanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, the only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">For instance, imaging the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
+S1: 100 -&gt; 101 (ID = 1) -&gt; 102 -&gt; 103
+S0: 100 -&gt; 101 -&gt; 102 (ID = 2) -&gt; 103
+Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span> when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="receiver_state_limits">
+<section id="section-8.4">
+        <h3 id="name-receiver-state-limits">
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-receiver-state-limits" class="section-name selfRef">Receiver State Limits</a>
+        </h3>
+<p id="section-8.4-1">The receiver maintains a "status window" — a sliding window of contiguous Frame IDs for which it retains decode/receive status. The size of this window (the "status window size") represents the maximum number of consecutive Frame IDs the receiver tracks at any given time. As new Frame IDs are received, the window advances and the oldest entries are discarded.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+<p id="section-8.4-2">A receiver <span class="bcp14">MUST</span> be prepared to maintain a status window of at least 255 frames. A larger status window size <span class="bcp14">MAY</span> be negotiated via SDP (see <span><a href="#status_window_size_signaling" class="internal xref">Status Window Size Signaling</a> (<a href="#status_window_size_signaling" class="auto internal xref">Section 9.4</a>)</span>). If no value is negotiated, the default status window size is 255.<a href="#section-8.4-2" class="pilcrow">¶</a></p>
+<p id="section-8.4-3">When a new Frame ID is received that would cause the number of tracked Frame IDs to exceed the status window size, the receiver <span class="bcp14">MUST</span> advance the window by discarding the status of the oldest Frame IDs first (FIFO order), retaining only the most recent entries up to the status window size.<a href="#section-8.4-3" class="pilcrow">¶</a></p>
+<p id="section-8.4-4">If the receiver receives a feedback request whose Feedback Start refers to a Frame ID that has fallen outside its status window (i.e., the state for that Frame ID has been discarded), the receiver <span class="bcp14">MUST</span> respond with a feedback message where the Start Frame ID is set to the oldest Frame ID still within its status window. The Length and status vector cover the intersection of the requested range and the receiver's available state. If there is no overlap between the requested range and the receiver's status window (i.e., the entire requested range has been discarded), the receiver <span class="bcp14">MUST</span> respond with a feedback message with the Start Frame ID set to the Feedback Start from the sender's request and Length set to 0. A sender that receives a feedback response with a Start Frame ID newer than what it requested or a Length of 0 <span class="bcp14">SHOULD</span> interpret this as an indication that the receiver has discarded state for the older frames and <span class="bcp14">MUST NOT</span> use those older frames as references without re-establishing them (e.g., via a keyframe).<a href="#section-8.4-4" class="pilcrow">¶</a></p>
+<p id="section-8.4-5">If the negotiated status window size exceeds 255 frames and the receiver needs to report status for more Frame IDs than a single feedback message can carry (limited by the 8-bit Length field to 255 entries), the receiver <span class="bcp14">MUST</span> split the feedback across multiple RTCP Frame Acknowledgement Feedback messages, each covering a contiguous subset of the requested range.<a href="#section-8.4-5" class="pilcrow">¶</a></p>
+<p id="section-8.4-6">A sender <span class="bcp14">SHOULD</span> issue feedback requests regularly and <span class="bcp14">SHOULD NOT</span> allow the number of unacknowledged Frame IDs to exceed the receiver's status window size. If the sender fails to do so, the receiver will discard state for older frames as described above.<a href="#section-8.4-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="out-of-order-message-handling">
+<section id="section-8.5">
+        <h3 id="name-out-of-order-message-handli">
+<a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
+        </h3>
+<p id="section-8.5-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="sdp_signaling">
+<section id="section-9">
+      <h2 id="name-sdp-signaling">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-sdp-signaling" class="section-name selfRef">SDP Signaling</a>
+      </h2>
+<p id="section-9-1">This section defines how to signal the Frame Acknowledgement RTP header extension and the Frame Acknowledgement Feedback RTCP message using the Session Description Protocol (SDP).<a href="#section-9-1" class="pilcrow">¶</a></p>
+<div id="rtp-header-extension">
+<section id="section-9.1">
+        <h3 id="name-rtp-header-extension">
+<a href="#section-9.1" class="section-number selfRef">9.1. </a><a href="#name-rtp-header-extension" class="section-name selfRef">RTP Header Extension</a>
+        </h3>
+<p id="section-9.1-1">The Frame Acknowledgement extension is declared in SDP using the "extmap" attribute. The extension does not use any extension attributes.<a href="#section-9.1-1" class="pilcrow">¶</a></p>
+<p id="section-9.1-2">The URI for declaring this header extension in an extmap attribute is "urn:ietf:params:rtp-hdrext:frame-acknowledgement".<a href="#section-9.1-2" class="pilcrow">¶</a></p>
+<p id="section-9.1-3">Example attribute line in SDP:<a href="#section-9.1-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.1-4">
+<pre>
+   a=extmap:4 urn:ietf:params:rtp-hdrext:frame-acknowledgement
+</pre><a href="#section-9.1-4" class="pilcrow">¶</a>
+</div>
+<p id="section-9.1-5">The extension identifier (4 in the example) is chosen per <span>[<a href="#RFC8285" class="cite xref">RFC8285</a>]</span> and <span class="bcp14">MUST</span> be unique within the media description.<a href="#section-9.1-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="rtcp-feedback">
+<section id="section-9.2">
+        <h3 id="name-rtcp-feedback">
+<a href="#section-9.2" class="section-number selfRef">9.2. </a><a href="#name-rtcp-feedback" class="section-name selfRef">RTCP Feedback</a>
+        </h3>
+<p id="section-9.2-1">Support for the Frame Acknowledgement Feedback RTCP message is signaled using the "rtcp-fb" attribute as defined in <span>[<a href="#RFC4585" class="cite xref">RFC4585</a>]</span>. The feedback type "frame-acknowledgement" indicates that the endpoint supports sending and/or receiving the Frame Acknowledgement Feedback message (PT=RTPFB, FMT as assigned by IANA for this feedback type).<a href="#section-9.2-1" class="pilcrow">¶</a></p>
+<p id="section-9.2-2">The "rtcp-fb" attribute is specified with a payload type value that identifies the RTP payload format for which Frame Acknowledgement Feedback is supported.<a href="#section-9.2-2" class="pilcrow">¶</a></p>
+<p id="section-9.2-3">Syntax:<a href="#section-9.2-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.2-4">
+<pre>
+   a=rtcp-fb:&lt;payload type&gt; frame-acknowledgement
+</pre><a href="#section-9.2-4" class="pilcrow">¶</a>
+</div>
+<p id="section-9.2-5">When used in an offer/answer context, inclusion of "a=rtcp-fb:96 frame-acknowledgement" (with the appropriate payload type for the media) in the SDP indicates that the sender of the SDP is capable of receiving Frame Acknowledgement Feedback messages for the indicated payload type, and that the receiver of the SDP may send Frame Acknowledgement Feedback messages when the RTP header extension is also negotiated for the same media.<a href="#section-9.2-5" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="receiver-triggered-resync">
+<section id="section-9.3">
+        <h3 id="name-receiver-triggered-resync">
+<a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-receiver-triggered-resync" class="section-name selfRef">Receiver-Triggered Resync</a>
+        </h3>
+<p id="section-9.3-1">A receiver that supports sending resync requests (R=1 in the Frame Acknowledgement Feedback message) <span class="bcp14">MAY</span> indicate that it will trigger resync based on decode starvation, and <span class="bcp14">MAY</span> configure the timeout for doing so, using an optional parameter on the "frame-acknowledgement" rtcp-fb attribute.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
+<p id="section-9.3-2">The "resync-timeout" parameter specifies the time in milliseconds that the receiver will wait for decoding to make progress before sending a resync request. Decode starvation occurs when the receiver cannot advance decoding (e.g., it is blocked waiting for a frame or data that cannot be recovered). If decoding does not make progress for the specified duration, the receiver should send a Frame Acknowledgement Feedback message with the R flag set and a Resync Frame ID referencing the last successfully decoded frame.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
+<p id="section-9.3-3">Syntax:<a href="#section-9.3-3" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.3-4">
+<pre>
+   a=rtcp-fb:&lt;payload type&gt; frame-acknowledgement;resync-timeout=&lt;timeout-ms&gt;
+</pre><a href="#section-9.3-4" class="pilcrow">¶</a>
+</div>
+<p id="section-9.3-5">The value "timeout-ms" is an integer in the range 1-65535, representing the timeout in milliseconds. If "resync-timeout" is omitted, the receiver <span class="bcp14">MAY</span> still send resync requests at its discretion (e.g., on unrecoverable loss) but need not use a timeout-based trigger. Inclusion of "resync-timeout" indicates that the receiver supports and shall use timeout-based resync when decode starves for at least the given duration.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
+<p id="section-9.3-6">Example attribute lines in SDP (Only one of the format must be present per payload type):<a href="#section-9.3-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.3-7">
+<pre>
+   a=rtcp-fb:96 frame-acknowledgement
+   Or
+   a=rtcp-fb:96 frame-acknowledgement;resync-timeout=500
+</pre><a href="#section-9.3-7" class="pilcrow">¶</a>
+</div>
+<p id="section-9.3-8">The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps use-cases to choose how long receiver need to wait before triggering resync request. Media sender can adjust its interval to request frame acknowledgement feedback if "resync-timeout" based resync feedback is supported by receiver. Media sender can avoid sending frequent frame acknowledgement requests depending on the use-case. Additionally sender could consider RTT during handling of resync feedbacks.<a href="#section-9.3-8" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="status_window_size_signaling">
+<section id="section-9.4">
+        <h3 id="name-status-window-size-signalin">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-status-window-size-signalin" class="section-name selfRef">Status Window Size Signaling</a>
+        </h3>
+<p id="section-9.4-1">A receiver <span class="bcp14">MAY</span> signal the maximum number of frame statuses it is prepared to maintain (its status window size) using the "status-window-size" parameter on the "frame-acknowledgement" rtcp-fb attribute.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-2">Syntax:<a href="#section-9.4-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.4-3">
+<pre>
+   a=rtcp-fb:&lt;payload type&gt; frame-acknowledgement;status-window-size=&lt;N&gt;
+</pre><a href="#section-9.4-3" class="pilcrow">¶</a>
+</div>
+<p id="section-9.4-4">The value N is a positive integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. Values larger than 255 are permitted; in such cases, the receiver <span class="bcp14">MUST</span> split feedback across multiple RTCP messages as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
+<p id="section-9.4-5">When used in an offer/answer context, the offerer <span class="bcp14">MAY</span> include a "status-window-size" value to propose a maximum status window size. The answerer <span class="bcp14">MUST</span> respond with a value less than or equal to the offered value. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 <span class="bcp14">SHALL</span> be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender <span class="bcp14">MUST</span> ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.<a href="#section-9.4-5" class="pilcrow">¶</a></p>
+<p id="section-9.4-6">If multiple parameters are present, they are separated by semicolons:<a href="#section-9.4-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.4-7">
+<pre>
+   a=rtcp-fb:96 frame-acknowledgement;resync-timeout=500;status-window-size=64
+</pre><a href="#section-9.4-7" class="pilcrow">¶</a>
+</div>
 </section>
 </div>
 </section>
 </div>
 <div id="security-considerations">
-<section id="section-9">
+<section id="section-10">
       <h2 id="name-security-considerations">
-<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-9-1">The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially in an indirect way which frames the sender sees as important for recovery.<a href="#section-9-1" class="pilcrow">¶</a></p>
-<p id="section-9-2">This data should however not pose any significant privacy or security risks.<a href="#section-9-2" class="pilcrow">¶</a></p>
+<p id="section-10-1">The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially in an indirect way which frames the sender sees as important for recovery.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">This data should however not pose any significant privacy or security risks.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<div id="state-exhaustion">
+<section id="section-10.1">
+        <h3 id="name-state-exhaustion">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-state-exhaustion" class="section-name selfRef">State Exhaustion</a>
+        </h3>
+<p id="section-10.1-1">A misbehaving sender could attempt to exhaust receiver memory by continuously assigning Frame IDs without ever issuing feedback requests, causing the receiver to accumulate frame state indefinitely. Receivers <span class="bcp14">MUST</span> implement a status window as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span> and discard state for older frames when this window is exceeded. The maximum state a compliant receiver will maintain is bounded by its status window size (default: 255 entries), which limits memory consumption to a small, predictable amount regardless of sender behavior.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="feedback-amplification">
+<section id="section-10.2">
+        <h3 id="name-feedback-amplification">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-feedback-amplification" class="section-name selfRef">Feedback Amplification</a>
+        </h3>
+<p id="section-10.2-1">A sender could potentially request feedback repeatedly for the same set of Frame IDs, causing the receiver to generate RTCP feedback traffic. This concern is mitigated by the RTCP feedback timing rules defined in <span>[<a href="#RFC4585" class="cite xref">RFC4585</a>]</span> (Sections 3.3 and 3.5), which govern when and how often immediate and early feedback can be transmitted. Receivers <span class="bcp14">MUST</span> comply with these timing rules regardless of how frequently feedback is requested.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="iana-considerations">
-<section id="section-10">
+<section id="section-11">
       <h2 id="name-iana-considerations">
-<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-10-1">The RTP header extension needs to have a URI identifier assigned by IANA. See <span>[<a href="#IANAEXT" class="cite xref">IANAEXT</a>]</span>.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<p id="section-10-2">The RTCP message uses PT = 205 (RTPFB, Generic RTP Feedback). As of writing, the next available FMT value is 12. A dedicated ID needs to be assigned by IANA. See <span>[<a href="#IANARTCP" class="cite xref">IANARTCP</a>]</span>.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-11-1">The RTP header extension needs to have a URI identifier assigned by IANA. See <span>[<a href="#IANAEXT" class="cite xref">IANAEXT</a>]</span>.<a href="#section-11-1" class="pilcrow">¶</a></p>
+<p id="section-11-2">The RTCP message uses PT = 205 (RTPFB, Generic RTP Feedback). As of writing, the next available FMT value is 12. A dedicated ID needs to be assigned by IANA. See <span>[<a href="#IANARTCP" class="cite xref">IANARTCP</a>]</span>.<a href="#section-11-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
-<section id="section-11">
+<section id="section-12">
       <h2 id="name-references">
-<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-references" class="section-name selfRef">References</a>
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-references" class="section-name selfRef">References</a>
       </h2>
 <div id="sec-normative-references">
-<section id="section-11.1">
+<section id="section-12.1">
         <h3 id="name-normative-references">
-<a href="#section-11.1" class="section-number selfRef">11.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+<a href="#section-12.1" class="section-number selfRef">12.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
         </h3>
 <dl class="references">
 <dt id="DD">[DD]</dt>
@@ -1677,9 +1837,9 @@ Since feedback is only really necessary for frames which the codec stores in a r
 </section>
 </div>
 <div id="sec-informative-references">
-<section id="section-11.2">
+<section id="section-12.2">
         <h3 id="name-informative-references">
-<a href="#section-11.2" class="section-number selfRef">11.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+<a href="#section-12.2" class="section-number selfRef">12.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
 <dt id="LNTF">[LNTF]</dt>
@@ -1697,6 +1857,10 @@ Since feedback is only really necessary for frames which the codec stores in a r
 <dt id="RFC7667">[RFC7667]</dt>
         <dd>
 <span class="refAuthor">Westerlund, M.</span> and <span class="refAuthor">S. Wenger</span>, <span class="refTitle">"RTP Topologies"</span>, <span class="seriesInfo">RFC 7667</span>, <span class="seriesInfo">DOI 10.17487/RFC7667</span>, <time datetime="2015-11" class="refDate">November 2015</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7667">https://www.rfc-editor.org/rfc/rfc7667</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8285">[RFC8285]</dt>
+        <dd>
+<span class="refAuthor">Singer, D.</span>, <span class="refAuthor">Desineni, H.</span>, and <span class="refAuthor">R. Even, Ed.</span>, <span class="refTitle">"A General Mechanism for RTP Header Extensions"</span>, <span class="seriesInfo">RFC 8285</span>, <span class="seriesInfo">DOI 10.17487/RFC8285</span>, <time datetime="2017-10" class="refDate">October 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8285">https://www.rfc-editor.org/rfc/rfc8285</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC8888">[RFC8888]</dt>
         <dd>
