@@ -280,7 +280,7 @@ Table of Contents
    In order to request and receive information about decoded frames, we
    must be able to identify them.  The frame acknowledgement header
    extension may contain a Frame ID field for this purpose.  The Frame
-   ID is an 16-bit unsigned integer field, that wraps around to 0 on
+   ID is a 16-bit unsigned integer field, that wraps around to 0 on
    overflow.
 
 6.2.  Frame Acknowledgment Request
@@ -441,7 +441,7 @@ Table of Contents
    that the receiver is requesting a resync frame.  When set to 0,
    acknowledgement is triggered by sender request.  If R=1, Start Frame
    ID should indicate latest decoded frame ID and status vector
-   contatining frames upto latest received Frame ID assuming length
+   containing frames up to the latest received Frame ID assuming length
    field is less than 256.
 
 7.1.2.  Reserved (7 bits)
@@ -495,7 +495,7 @@ Table of Contents
 
    Also note that no exceptions are made for keyframes.  I.e. keyframes
    may or may not be assigned a Frame ID, and any frames preceding a
-   keyframe must still be inlcuded in the feedback if requested by the
+   keyframe must still be included in the feedback if requested by the
    media sender - despite the keyframe being a new recovery point.
 
    The Frame ID sequence (and consequently the feedback messages
@@ -510,13 +510,13 @@ Table of Contents
    with the encoder (for example, due to an unrecoverable partial frame
    loss), it MAY send a Frame Acknowledgement Feedback message with the
    R flag (bit 0) set to 1 and specify status vector from latest decoded
-   FrameID upto latest received FrameID.
+   Frame ID up to latest received Frame ID.
 
    Upon receiving a resync request, the sender SHOULD: 1.  Verify that
    the decoded Frame ID corresponds to a frame that is still available
    in its reference buffer. 2.  Encode the next frame using the
    specified frame or another frame with references it knows to be
-   available at the receiver . 3.  If the specified frame is no longer
+   available at the receiver. 3.  If the specified frame is no longer
    available in the reference buffer, the sender SHOULD encode a
    keyframe.
 
@@ -539,14 +539,14 @@ Table of Contents
 
 8.3.  Using acknowledgement ranges
 
-   The feedback request menchanism has the ability to respond with the
+   The feedback request mechanism has the ability to respond with the
    status of a range of Frame IDs, not just the last decoded Frame ID.
-   If video is encoded as a single dependency chain, the only the last
+   If video is encoded as a single dependency chain, only the last
    decoded Frame ID would likely be sufficient.  However, when spatial
    scalability such as "simulcast" is employed the situation gets more
    complex.
 
-   For instance, imaging the following scenario where two independent
+   For instance, imagine the following scenario where two independent
    layers are sent (with the numbers indicating frame timestamps and ID
    being the Frame IDs): S1: 100 -> 101 (ID = 1) -> 102 -> 103 S0: 100
    -> 101 -> 102 (ID = 2) -> 103 Here, if the feedback for Frame ID 1 is
