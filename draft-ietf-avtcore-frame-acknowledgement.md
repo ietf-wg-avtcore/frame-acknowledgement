@@ -149,7 +149,7 @@ The messages in this proposal are intended to fulfill the following requirements
 The Frame Acknowledgement extension is an RTP header extension used both to identify frames and request feedback about the remote state.
 It SHOULD appear on the last packet of a video frame, and MUST NOT appear more than once on a single frame.
 
-## Frame Identifier
+## Frame Identifier {#frame_identifier}
 
 In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is an 16-bit unsigned integer field, that wraps around to 0 on overflow.
 
@@ -331,7 +331,7 @@ If the negotiated status window size exceeds 255 frames and the receiver needs t
 
 A sender SHOULD issue feedback requests regularly and SHOULD NOT allow the number of unacknowledged Frame IDs to exceed the receiver's status window size. If the sender fails to do so, the receiver will discard state for older frames as described above.
 
-## Out-of-order Message Handling
+## Out-of-order Message Handling {#out_of_order_handling}
 
 Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.
 
@@ -401,9 +401,9 @@ Syntax:
    a=rtcp-fb:<payload type> frame-acknowledgement;status-window-size=<N>
 ~~~
 
-The value N is a positive integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. Values larger than 255 are permitted; in such cases, the receiver MUST split feedback across multiple RTCP messages as described in [Receiver State Limits](#receiver_state_limits).
+The value N is an integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. N MUST be in the range 1 to 32767 inclusive. The upper bound follows from the Frame ID being a 16-bit field that wraps (see [Frame Identifier](#frame_identifier)): ordering wrapped Frame IDs relies on the same serial-number arithmetic used for RTP sequence numbers (see {{?RFC3550}}, Appendix A.1), which is only unambiguous when the values being compared are less than 2^15 (32768) apart. Values larger than 255 are permitted; in such cases, the receiver MUST split feedback across multiple RTCP messages as described in [Receiver State Limits](#receiver_state_limits).
 
-When used in an offer/answer context, the offerer MAY include a "status-window-size" value to propose a maximum status window size. The answerer MUST respond with a value less than or equal to the offered value. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 SHALL be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender MUST ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.
+When used in an offer/answer context, the offerer MAY include a "status-window-size" value to propose a maximum status window size. The answerer MUST respond with a value less than or equal to the offered value. Both the offered and answered values MUST be within the range 1 to 32767 inclusive; a recipient that receives a "status-window-size" value outside this range MUST ignore the parameter and use the default value of 255. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 SHALL be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender MUST ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.
 
 If multiple parameters are present, they are separated by semicolons:
 
@@ -424,6 +424,10 @@ A misbehaving sender could attempt to exhaust receiver memory by continuously as
 ## Feedback Amplification
 
 A sender could potentially request feedback repeatedly for the same set of Frame IDs, causing the receiver to generate RTCP feedback traffic. This concern is mitigated by the RTCP feedback timing rules defined in {{?RFC4585}} (Sections 3.3 and 3.5), which govern when and how often immediate and early feedback can be transmitted. Receivers MUST comply with these timing rules regardless of how frequently feedback is requested.
+
+When a receiver defers transmission of a feedback message to comply with these timing rules (or due to bandwidth constraints), its status window continues to advance as new Frame IDs are received in the interim. The receiver MUST generate the contents of a deferred feedback message based on the state of its status window at the time the message is sent, not at the time the request was received. Consequently, frames that have fallen outside the status window between request and transmission are reported using the shifted Start Frame ID, reduced range, or Length=0 rules defined in [Receiver State Limits](#receiver_state_limits). For example, if a request for Frame IDs 1 through 4 cannot be answered until the status window has advanced to 3 through 6, the receiver responds with feedback covering only Frame IDs 3 and 4.
+
+If a receiver receives a new feedback request before it has transmitted a response to an earlier, still-pending request, the receiver SHOULD drop the older request and respond only to the most recent one. This complements the supersession rule in [Out-of-order Message Handling](#out_of_order_handling), and ensures that a sender requesting feedback faster than the timing rules permit responses does not cause a backlog of feedback messages to accumulate at the receiver.
 
 # IANA Considerations
 
