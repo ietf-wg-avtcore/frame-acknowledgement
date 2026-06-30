@@ -1421,7 +1421,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       </h2>
 <p id="section-6-1">The Frame Acknowledgement extension is an RTP header extension used both to identify frames and request feedback about the remote state.
 It <span class="bcp14">SHOULD</span> appear on the last packet of a video frame, and <span class="bcp14">MUST NOT</span> appear more than once on a single frame.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="frame-identifier">
+<div id="frame_identifier">
 <section id="section-6.1">
         <h3 id="name-frame-identifier">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-frame-identifier" class="section-name selfRef">Frame Identifier</a>
@@ -1671,7 +1671,7 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <p id="section-8.4-6">A sender <span class="bcp14">SHOULD</span> issue feedback requests regularly and <span class="bcp14">SHOULD NOT</span> allow the number of unacknowledged Frame IDs to exceed the receiver's status window size. If the sender fails to do so, the receiver will discard state for older frames as described above.<a href="#section-8.4-6" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="out-of-order-message-handling">
+<div id="out_of_order_handling">
 <section id="section-8.5">
         <h3 id="name-out-of-order-message-handli">
 <a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
@@ -1756,8 +1756,8 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
    a=rtcp-fb:&lt;payload type&gt; frame-acknowledgement;status-window-size=&lt;N&gt;
 </pre><a href="#section-9.4-3" class="pilcrow">¶</a>
 </div>
-<p id="section-9.4-4">The value N is a positive integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. Values larger than 255 are permitted; in such cases, the receiver <span class="bcp14">MUST</span> split feedback across multiple RTCP messages as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
-<p id="section-9.4-5">When used in an offer/answer context, the offerer <span class="bcp14">MAY</span> include a "status-window-size" value to propose a maximum status window size. The answerer <span class="bcp14">MUST</span> respond with a value less than or equal to the offered value. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 <span class="bcp14">SHALL</span> be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender <span class="bcp14">MUST</span> ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.<a href="#section-9.4-5" class="pilcrow">¶</a></p>
+<p id="section-9.4-4">The value N is an integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. N <span class="bcp14">MUST</span> be in the range 1 to 32767 inclusive. The upper bound follows from the Frame ID being a 16-bit field that wraps (see <span><a href="#frame_identifier" class="internal xref">Frame Identifier</a> (<a href="#frame_identifier" class="auto internal xref">Section 6.1</a>)</span>): ordering wrapped Frame IDs relies on the same serial-number arithmetic used for RTP sequence numbers (see <span>[<a href="#RFC3550" class="cite xref">RFC3550</a>]</span>, Appendix A.1), which is only unambiguous when the values being compared are less than 2^15 (32768) apart. Values larger than 255 are permitted; in such cases, the receiver <span class="bcp14">MUST</span> split feedback across multiple RTCP messages as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
+<p id="section-9.4-5">When used in an offer/answer context, the offerer <span class="bcp14">MAY</span> include a "status-window-size" value to propose a maximum status window size. The answerer <span class="bcp14">MUST</span> respond with a value less than or equal to the offered value. Both the offered and answered values <span class="bcp14">MUST</span> be within the range 1 to 32767 inclusive; a recipient that receives a "status-window-size" value outside this range <span class="bcp14">MUST</span> ignore the parameter and use the default value of 255. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 <span class="bcp14">SHALL</span> be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender <span class="bcp14">MUST</span> ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.<a href="#section-9.4-5" class="pilcrow">¶</a></p>
 <p id="section-9.4-6">If multiple parameters are present, they are separated by semicolons:<a href="#section-9.4-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.4-7">
 <pre>
@@ -1789,6 +1789,8 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-feedback-amplification" class="section-name selfRef">Feedback Amplification</a>
         </h3>
 <p id="section-10.2-1">A sender could potentially request feedback repeatedly for the same set of Frame IDs, causing the receiver to generate RTCP feedback traffic. This concern is mitigated by the RTCP feedback timing rules defined in <span>[<a href="#RFC4585" class="cite xref">RFC4585</a>]</span> (Sections 3.3 and 3.5), which govern when and how often immediate and early feedback can be transmitted. Receivers <span class="bcp14">MUST</span> comply with these timing rules regardless of how frequently feedback is requested.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-2">When a receiver defers transmission of a feedback message to comply with these timing rules (or due to bandwidth constraints), its status window continues to advance as new Frame IDs are received in the interim. The receiver <span class="bcp14">MUST</span> generate the contents of a deferred feedback message based on the state of its status window at the time the message is sent, not at the time the request was received. Consequently, frames that have fallen outside the status window between request and transmission are reported using the shifted Start Frame ID, reduced range, or Length=0 rules defined in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>. For example, if a request for Frame IDs 1 through 4 cannot be answered until the status window has advanced to 3 through 6, the receiver responds with feedback covering only Frame IDs 3 and 4.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
+<p id="section-10.2-3">If a receiver receives a new feedback request before it has transmitted a response to an earlier, still-pending request, the receiver <span class="bcp14">SHOULD</span> drop the older request and respond only to the most recent one. This complements the supersession rule in <span><a href="#out_of_order_handling" class="internal xref">Out-of-order Message Handling</a> (<a href="#out_of_order_handling" class="auto internal xref">Section 8.5</a>)</span>, and ensures that a sender requesting feedback faster than the timing rules permit responses does not cause a backlog of feedback messages to accumulate at the receiver.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1845,6 +1847,10 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <dt id="LNTF">[LNTF]</dt>
         <dd>
 <span class="refTitle">"RTCP feedback Message for Loss Notification"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-majali-avtcore-lntf-feedback-message-00.html">https://www.ietf.org/archive/id/draft-majali-avtcore-lntf-feedback-message-00.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3550">[RFC3550]</dt>
+        <dd>
+<span class="refAuthor">Schulzrinne, H.</span>, <span class="refAuthor">Casner, S.</span>, <span class="refAuthor">Frederick, R.</span>, and <span class="refAuthor">V. Jacobson</span>, <span class="refTitle">"RTP: A Transport Protocol for Real-Time Applications"</span>, <span class="seriesInfo">STD 64</span>, <span class="seriesInfo">RFC 3550</span>, <span class="seriesInfo">DOI 10.17487/RFC3550</span>, <time datetime="2003-07" class="refDate">July 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3550">https://www.rfc-editor.org/rfc/rfc3550</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC4585">[RFC4585]</dt>
         <dd>

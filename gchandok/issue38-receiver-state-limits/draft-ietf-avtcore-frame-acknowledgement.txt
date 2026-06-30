@@ -730,21 +730,30 @@ Table of Contents
 
    a=rtcp-fb:<payload type> frame-acknowledgement;status-window-size=<N>
 
-   The value N is a positive integer representing the maximum number of
+   The value N is an integer representing the maximum number of
    unacknowledged frame statuses the receiver will retain at any given
-   time.  Values larger than 255 are permitted; in such cases, the
-   receiver MUST split feedback across multiple RTCP messages as
-   described in Receiver State Limits (Section 8.4).
+   time.  N MUST be in the range 1 to 32767 inclusive.  The upper bound
+   follows from the Frame ID being a 16-bit field that wraps (see Frame
+   Identifier (Section 6.1)): ordering wrapped Frame IDs relies on the
+   same serial-number arithmetic used for RTP sequence numbers (see
+   [RFC3550], Appendix A.1), which is only unambiguous when the values
+   being compared are less than 2^15 (32768) apart.  Values larger than
+   255 are permitted; in such cases, the receiver MUST split feedback
+   across multiple RTCP messages as described in Receiver State Limits
+   (Section 8.4).
 
    When used in an offer/answer context, the offerer MAY include a
    "status-window-size" value to propose a maximum status window size.
    The answerer MUST respond with a value less than or equal to the
-   offered value.  If the answerer omits the "status-window-size"
-   parameter entirely, the default value of 255 SHALL be used.  The
-   negotiated value (the answerer's value, or 255 if omitted) is the
-   operative status window size for the session; the sender MUST ensure
-   that the number of outstanding (unacknowledged) Frame IDs does not
-   exceed this value.
+   offered value.  Both the offered and answered values MUST be within
+   the range 1 to 32767 inclusive; a recipient that receives a "status-
+   window-size" value outside this range MUST ignore the parameter and
+   use the default value of 255.  If the answerer omits the "status-
+   window-size" parameter entirely, the default value of 255 SHALL be
+   used.  The negotiated value (the answerer's value, or 255 if omitted)
+   is the operative status window size for the session; the sender MUST
+   ensure that the number of outstanding (unacknowledged) Frame IDs does
+   not exceed this value.
 
    If multiple parameters are present, they are separated by semicolons:
 
@@ -781,6 +790,28 @@ Table of Contents
    how often immediate and early feedback can be transmitted.  Receivers
    MUST comply with these timing rules regardless of how frequently
    feedback is requested.
+
+   When a receiver defers transmission of a feedback message to comply
+   with these timing rules (or due to bandwidth constraints), its status
+   window continues to advance as new Frame IDs are received in the
+   interim.  The receiver MUST generate the contents of a deferred
+   feedback message based on the state of its status window at the time
+   the message is sent, not at the time the request was received.
+   Consequently, frames that have fallen outside the status window
+   between request and transmission are reported using the shifted Start
+   Frame ID, reduced range, or Length=0 rules defined in Receiver State
+   Limits (Section 8.4).  For example, if a request for Frame IDs 1
+   through 4 cannot be answered until the status window has advanced to
+   3 through 6, the receiver responds with feedback covering only Frame
+   IDs 3 and 4.
+
+   If a receiver receives a new feedback request before it has
+   transmitted a response to an earlier, still-pending request, the
+   receiver SHOULD drop the older request and respond only to the most
+   recent one.  This complements the supersession rule in Out-of-order
+   Message Handling (Section 8.5), and ensures that a sender requesting
+   feedback faster than the timing rules permit responses does not cause
+   a backlog of feedback messages to accumulate at the receiver.
 
 11.  IANA Considerations
 
@@ -821,6 +852,11 @@ Table of Contents
    [LNTF]     "RTCP feedback Message for Loss Notification", n.d.,
               <https://www.ietf.org/archive/id/draft-majali-avtcore-
               lntf-feedback-message-00.html>.
+
+   [RFC3550]  Schulzrinne, H., Casner, S., Frederick, R., and V.
+              Jacobson, "RTP: A Transport Protocol for Real-Time
+              Applications", STD 64, RFC 3550, DOI 10.17487/RFC3550,
+              July 2003, <https://www.rfc-editor.org/rfc/rfc3550>.
 
    [RFC4585]  Ott, J., Wenger, S., Sato, N., Burmeister, C., and J. Rey,
               "Extended RTP Profile for Real-time Transport Control
