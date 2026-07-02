@@ -71,11 +71,16 @@ informative:
     title: Dependency Descriptor RTP Header Extension
     author:
       org: AOM
-  VFM:
-    target: https://datatracker.ietf.org/doc/rfc9626/
-    title: Video Frame Marking RTP Header Extension
+  AV1-Spec:
+    target: https://aomediacodec.github.io/av1-spec/av1-spec.pdf
+    title: AV1 Bitstream & Decoding Process Specification
     author:
-      org: IETF
+      org: AOM
+  AV2-Spec:
+    target: https://av2.aomedia.org/v13-public/index.html
+    title: AV2 Bitstream & Decoding Process Specification
+    author:
+      org: AOM
 
 
 
@@ -171,9 +176,9 @@ If a new Frame Acknowledgement Request is sent with an incremented Feedback Star
 This section describes the data layout for the Frame Acknowledgment RTP Header Extension.
 The extension data starts with the FFR/Reserved byte.
 
-For a One-Byte Header (as defined in {{?RFC5285}}, Section 4.2), the `ID` field identifies the extension, and the `len` field is a 4-bit value `N` that indicates the number of data bytes following the `ID` and `len` fields, *minus one*. Thus, the total number of bytes for the extension data is `N+1`.
+For a One-Byte Header (as defined in {{?RFC8285}}, Section 4.2), the `ID` field identifies the extension, and the `len` field is a 4-bit value `N` that indicates the number of data bytes following the `ID` and `len` fields, *minus one*. Thus, the total number of bytes for the extension data is `N+1`.
 
-For a Two-Byte Header (as defined in {{?RFC5285}}, Section 4.3), the `ID` field identifies the extension, and the 8-bit `length` field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).
+For a Two-Byte Header (as defined in {{?RFC8285}}, Section 4.3), the `ID` field identifies the extension, and the 8-bit `length` field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).
 
 ~~~
  Extension Data:
@@ -308,13 +313,13 @@ Firstly, the Frame Acknowledgement header extension MUST uniquely identify a sin
 Since we allow only one Frame Acknowledgement header extension per packet, we can identify no more than one frame per packet. Should a packet contain a bundle of multiple frames, the Frame ID in the header extension refers to the last frame in the bundle.
 
 Secondly, the Frame ID always refers to the minimum independently decodable unit of data in the packet.
-This means that if for instance spatial layers are used, where there are multiple frames per temporal unit, a Frame ID set on the last packet refers only to the last layer frame - not the entire "super frame". It is up to the sender to determine which subset of data it is interested in. If all layers should be individually acknowledged (e.g. when independent simulcast-style layers are used), then send should mark each individual layer frame with a unique Frame ID.
+This means that if, for instance, spatial layers are used, where there are multiple frames per temporal unit, a Frame ID set on the last packet refers only to the last layer frame - not the entire "superframe". It is up to the sender to determine which subset of data it is interested in. If all layers should be individually acknowledged (e.g. when independent, simulcast-style layers are used), then the sender should mark each individual layer frame with a unique Frame ID.
 
-Similarly, independently decodable sub-regions within a picture (e.g. H.266 Subpictures or AV2 Extended Layers) may be marked with individual Frame IDs if they are packetized such that each sub-region ends in a separate packet.
+Similarly, independently decodable sub-regions within a picture (e.g. H.266/VVC Subpictures or AV2 Extended Layers) may be marked with individual Frame IDs if they are packetized such that each sub-region ends in a separate packet.
 
 ## Resync Request Handling
 
-When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it MAY send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded FrameID upto latest received FrameID.
+When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it MAY send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded Frame ID up to the latest received Frame ID.
 
 Upon receiving a resync request, the sender SHOULD:
 1. Verify that the decoded Frame ID corresponds to a frame that is still available in its reference buffer.
@@ -329,9 +334,9 @@ When considering a multi-way application with an SFU/SFM-type relay in the middl
 
 ## Using acknowledgement ranges
 
-The feedback request menchanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, the only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.
+The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, then only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.
 
-For instance, imaging the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
+For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
 S1: 100 -> 101 (ID = 1) -> 102 -> 103
 S0: 100 -> 101 -> 102 (ID = 2) -> 103
 Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for. This guarantees that the sender is always able to acquire feedback for all frames it has sent.
@@ -590,9 +595,9 @@ This appendix shows some concrete examples of how to identify a "frame" in accor
 ## Simple RTP
 {:numbered="false"}
 
-In the simplest of cases, with no scalability or other advanced reference structure, no padding packets, nothing fancy at all - one can simply look at the marker bit of the RTP header. If it is set, it indicates the end of a frame and is thus eligible to receive a Frame ID. The caveat being that there is very unclear need for frame acknoledgement in this use case.
+In the simplest of cases, with no scalability or other advanced reference structure, no padding packets, nothing fancy at all - one can simply look at the marker bit of the RTP header. If it is set, it indicates the end of a frame and is thus eligible to receive a Frame ID. The caveat being that there is very unclear need for frame acknowledgement in this use case.
 
-## Coded Agnostic Idenitifaction
+## Codec Agnostic Identification
 {:numbered="false"}
 
 In some applications, metadata provided via RTP header extensions can be used to reason about the frames contained in the packets, without actually having to parse the RTP payload data. This greatly simplifies inferring which "frame" the extension is attached to.
@@ -600,7 +605,7 @@ In some applications, metadata provided via RTP header extensions can be used to
 ### Video Frame Marking RTP Header Extension
 {:numbered="false"}
 
-If the Video Frame Marking extension {{VFM}} is used to signal frame dependencies, packets with the 'E' bit set indicate that the end of a frame, and are candidates for being assigned a Frame ID.
+If the Video Frame Marking extension {{?RFC9626}} is used to signal frame dependencies, packets with the 'E' bit set indicate the end of a frame, and are candidates for being assigned a Frame ID.
 
 ### Dependency Descriptor RTP Header Extension
 {:numbered="false"}
@@ -615,37 +620,59 @@ If no codec agnostic header metadata is available, a codec specific payload head
 ### VP8
 {:numbered="false"}
 
-The VP8 payload descriptor (RFC 7741) has a start-of-frame flag, but does not have an end-of-frame one. Instead, it relies on the RTP marker bit to indicate the end of frame, and thus eligibility of Frame ID.
+*   **Layer Frame (Picture):** A VP8 picture is packetized with a VP8 payload descriptor {{?RFC7741}} across one or more RTP packets. The end of a layer frame is indicated by the RTP marker bit (M) being set to 1.
 
 ### VP9
 {:numbered="false"}
 
-The VP9 payload descriptor (RFC 9628) has an 'e' bit indicating end-of-frame, and if this is set, the frame is eligible to receive a Frame ID.
+The RTP payload format for VP9 is defined in {{?RFC9628}}.
+
+*   **Superframe (Access Unit):** A VP9 superframe (or temporal unit) contains one or more layer frames (spatial or temporal layers) at the same time instant. The end of a superframe is the last packet of the highest active layer frame in the superframe, indicated by the RTP marker bit (M) set to 1.
+*   **Layer Frame (Picture):** A VP9 picture is packetized in one or more RTP packets. The end of a layer frame is identified by the `e` (end-of-frame) bit set to 1 in the VP9 payload descriptor.
 
 ### H.264/AVC
 {:numbered="false"}
 
-The H.264/AVC payload format does not have an explicit end of frame flag. In the base (RFC 6184) version, the end of a frame can often be inferred either through the marker bit or through the E bit of a Fragmentation Unit. However in the scalable (RFC 6190) version, it is necessary to observe the transition of the dependency_id or quality_id to determine frame boundaries.
+The RTP payload formats for H.264/AVC and H.264/SVC are defined in {{?RFC6184}} and {{?RFC6190}}, respectively.
+
+*   **Superframe (Access Unit):** For scalable streams (H.264/SVC), an Access Unit contains pictures from multiple layers. The end of the Access Unit (superframe) is the last packet of the highest active layer picture in the Access Unit. The RTP marker bit (M) MUST be set to 1 on the last packet of this highest layer picture. For non-scalable H.264/AVC, the Access Unit consists of a single picture, and its end corresponds to the end of that picture (with M=1).
+*   **Layer Frame (Picture):** A picture is composed of one or more slices. In the base H.264/AVC version, the end of a picture/layer frame can be inferred when the last slice of the picture is received (indicated by the RTP marker bit (M) or the E bit of a Fragmentation Unit). In the scalable (SVC) version, the end of a layer frame is identified by observing the transition of `dependency_id` or `quality_id` in the payload header.
 
 ### H.265/HEVC
 {:numbered="false"}
 
-TODO: Discuss H.265. Make special note of SVC. Also discuss sub-regions (some sort of slices, or maybe Motion Constrained Tile Sets)?
+The RTP payload format for H.265/HEVC is defined in {{?RFC7798}}.
+
+*   **Superframe (Access Unit):** For scalable streams (SHVC), an Access Unit contains pictures from multiple layers at the same time instant. The end of the Access Unit (superframe) is the last packet of the highest active layer picture in the Access Unit. The RTP marker bit (M) MUST be set to 1 on the last packet of this highest layer picture, indicating the end of the entire Access Unit.
+*   **Layer Frame (Picture):** A single picture within a layer is comprised of VCL NAL units. The end of a picture/layer frame can be identified when the last VCL NAL unit of that picture is received. Slices belonging to the same picture share the same Picture Order Count (POC) and layer identifier (`nuh_layer_id`).
+*   **Tile/Subpicture:** H.265 supports Motion Constrained Tile Sets (MCTS). If independent tiles (MCTS) are packetized as separate slices (or slice segments), the end of a tile/sub-region corresponds to the end of the NAL unit containing the last slice segment of that tile.
 
 ### H.266/VVC
 {:numbered="false"}
 
-TODO: Discuss H.266. Make special note of SVC. ALso discuss Subpictures.
+The RTP payload format for H.266/VVC is defined in {{?RFC9328}}. 
+
+*   **Superframe (Access Unit):** In a multilayer VVC bitstream, an Access Unit contains pictures for all layers at a given time instant. The end of the Access Unit (superframe) is the last packet of the highest active layer picture. The RTP marker bit (M) MUST be set to 1 on this last packet.
+*   **Layer Frame (Picture):** A picture consists of one or more VCL NAL units. The end of a picture/layer frame is the last VCL NAL unit of the picture, which can be identified by the end of the last slice of the picture. All slices in a picture share the same POC and `nuh_layer_id`.
+*   **Tile/Subpicture:** VVC natively supports Subpictures, which are independently decodable rectangular regions. A subpicture consists of one or more slices. If a subpicture is packetized independently, the end of the subpicture corresponds to the end of the NAL unit containing the last slice of that subpicture.
 
 ### AV1
 {:numbered="false"}
 
-TODO: Discuss AV1. Make special note of SVC.
+AV1 does not define a dedicated, codec-specific RTP payload format. Instead, it is commonly packetized using the Dependency Descriptor (DD) RTP header extension {{DD}}, which is codec-agnostic. Alternatively, the bitstream can be parsed directly.
+
+*   **Superframe (Temporal Unit):** An AV1 Temporal Unit consists of all OBUs associated with a single time instant (including all spatial/temporal layers). When using the Dependency Descriptor, the end of a Temporal Unit (superframe) is indicated when both the `end_of_frame` flag is 1 and the descriptor represents the highest active spatial/temporal layer in that Temporal Unit. In RTP packetization, the RTP marker bit (M) MUST be set to 1 on the last packet of the last layer frame of the Temporal Unit.
+*   **Layer Frame (Picture):** When using the Dependency Descriptor, the end of a layer frame is explicitly signaled by the `end_of_frame` bit set to 1 in the DD header. In the raw bitstream, a frame is composed of OBUs (Open Bitstream Units), and its end is reached when the last OBU of the frame (usually `OBU_FRAME` or the last `OBU_TILE_GROUP`) is fully received.
+*   **Tile/Subpicture:** AV1 does not have a native "subpicture" concept but supports Tiles. Tiles are contained within an `OBU_FRAME` or `OBU_TILE_GROUP`. The end of a tile or tile group can be identified by parsing the OBU headers.
 
 ### AV2
 {:numbered="false"}
 
-TODO: Discuss AV2. Make special note of SVC. Also discuss Extended Layers.
+AV2 does not yet have an RTP payload format defined, but the bitstream structure is specified in {{AV2-Spec}}. Similar to AV1, AV2 is structured around Open Bitstream Units (OBUs) and is designed to work with codec-agnostic header extensions like the Dependency Descriptor {{DD}}.
+
+*   **Superframe (Temporal Unit):** An AV2 Temporal Unit consists of all OBUs associated with a specific, distinct time instant. The end of the Temporal Unit is the end of the last layer frame in that unit, which is marked by the RTP marker bit (M) set to 1 on its last packet.
+*   **Layer Frame (Picture):** A layer frame in AV2 is a set of tile group OBUs with identical `obu_mlayer_id` (embedded layer ID) and `obu_tlayer_id` (temporal layer ID) values. Extended layers in AV2 are identified by `obu_xlayer_id` and can also be marked as individual layer frames if they are decoded independently. The end of a layer frame is reached when the last tile group OBU for that layer is received (e.g., `OBU_REGULAR_TILE_GROUP`, `OBU_CLOSED_LOOP_KEY`, etc.).
+*   **Tile/Subpicture:** AV2 supports Tiles. Like AV1, they are contained within tile group OBUs. The end of a tile group can be identified by parsing the OBU header and payload.
 
 
 # Acknowledgments
