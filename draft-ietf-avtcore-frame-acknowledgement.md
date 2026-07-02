@@ -610,31 +610,10 @@ If the Dependency Descriptor extension {{DD}} is used to signal frame dependenci
 ## Codec Specific Identification
 {:numbered="false"}
 
-If no codec agnostic header metadata is available, a codec specific payload header likely needs to be parser instead. More than that, if
+If no codec agnostic header metadata is available, a codec specific payload header likely needs to be parsed instead.
 
-### The Simple Case
+### VP8
 {:numbered="false"}
-
-In case no spatial SVC is used, i.e. there is only one frame per temporal unit, then figuring out which frame the Frame Acknowledgement extension is attached to ....
-
-
-ahh chucks.
-
-
-can there be cases where the video bitstream ends in a packet prior to the marker bit? Yes. But it doesn't break the simple case. Should be avoided though.
-
-
-How do we handle no-show flags? A no-show is fine - it updates state which is the important bit. A show-existing has little value, but I don't see why you wouldn't allow a frame marking on it.
-
-
--> Important distinction: add language to say the frame ack extension MUST NOT be put on a discardable packet.
-Consider if this should be moved to the Frame ID considerations section instead.
-
-
-
-
-
-
 
 The VP8 payload descriptor (RFC 7741) has a start-of-frame flag, but does not have an end-of-frame one. Instead, it relies on the RTP marker bit to indicate the end of frame, and thus eligibility of Frame ID.
 
@@ -646,18 +625,27 @@ The VP9 payload descriptor (RFC 9628) has an 'e' bit indicating end-of-frame, an
 ### H.264/AVC
 {:numbered="false"}
 
-The H.264/AVC payload format does not have an explicit end of frame flag. In the base (RFC 6184) version, the end of a frame can often be inferred either through the marker bit or through the E bit of a Fragmentation Unit. However in the scalable (RFC 6190) version, you actually need to observe the transition for of the dependency_id or quality_id to determine frame boundaries.
+The H.264/AVC payload format does not have an explicit end of frame flag. In the base (RFC 6184) version, the end of a frame can often be inferred either through the marker bit or through the E bit of a Fragmentation Unit. However in the scalable (RFC 6190) version, it is necessary to observe the transition of the dependency_id or quality_id to determine frame boundaries.
 
 ### H.265/HEVC
 {:numbered="false"}
 
+TODO: Discuss H.265. Make special note of SVC. Also discuss sub-regions (some sort of slices, or maybe Motion Constrained Tile Sets)?
 
+### H.266/VVC
+{:numbered="false"}
 
+TODO: Discuss H.266. Make special note of SVC. ALso discuss Subpictures.
 
+### AV1
+{:numbered="false"}
 
+TODO: Discuss AV1. Make special note of SVC.
 
+### AV2
+{:numbered="false"}
 
-
+TODO: Discuss AV2. Make special note of SVC. Also discuss Extended Layers.
 
 
 # Acknowledgments
