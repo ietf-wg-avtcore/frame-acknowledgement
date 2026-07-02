@@ -106,7 +106,7 @@ Additionally, there are situations where the receiver may experience partial or 
 
 Note that it is allowed to report a frame as decoded even if the decode process is not complete - as long as the receiver guarantees that it will attempt to decode the frame. The rationale for this is that we want to reduce the feedback delay as much as possible. Should the decoding of a frame that has been acknowledged fail, then the receiver MUST request a keyframe to recover, even if the failed decoding belongs to a droppable layer.
 
-# Conventions and Definitions
+# Conventions and Definitions {#conventions_and_definitions}
 
 {::boilerplate bcp14-tagged}
 
