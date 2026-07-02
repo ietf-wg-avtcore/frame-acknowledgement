@@ -1460,7 +1460,7 @@ It <span class="bcp14">MUST</span> appear on the last packet of a video frame, a
         <h3 id="name-frame-identifier">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-frame-identifier" class="section-name selfRef">Frame Identifier</a>
         </h3>
-<p id="section-6.1-1">In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is an 16-bit unsigned integer field, that wraps around to 0 on overflow.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-1">In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is a 16-bit unsigned integer field, that wraps around to 0 on overflow.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="frame-acknowledgment-request">
@@ -1608,7 +1608,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
           <h4 id="name-resync-request-flag-1-bit">
 <a href="#section-7.1.1" class="section-number selfRef">7.1.1. </a><a href="#name-resync-request-flag-1-bit" class="section-name selfRef">Resync Request Flag (1 bit)</a>
           </h4>
-<p id="section-7.1.1-1">The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, Start Frame ID should indicate latest decoded frame ID and status vector contatining frames upto latest received Frame ID assuming length field is less than 256.<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1.1-1">The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, Start Frame ID should indicate latest decoded frame ID and status vector containing frames up to the latest received Frame ID assuming length field is less than 256.<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="reserved-7-bits">
@@ -1657,7 +1657,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
       </h2>
 <p id="section-8-1">As stated above, the sender <span class="bcp14">MUST</span> increment the Frame ID by one for each new frame with the Frame Acknowledgement header extension present, in sending order. More than that, it must make sure that no wrap-around ambiguity can occur.<a href="#section-8-1" class="pilcrow">¶</a></p>
 <p id="section-8-2">Since feedback is only really necessary for frames which the codec stores in a reference buffer pending future use, the number of outstanding frames is in practice limited by the number of available reference buffers. E.g. for AV1, the upper limit will be 8. Although the optimal behavior will be application dependent, it is often advisable to spread reference buffer usage out across an RTT and to cull earlier buffer usage once later frames have been acknowledged.<a href="#section-8-2" class="pilcrow">¶</a></p>
-<p id="section-8-3">Also note that no exceptions are made for keyframes. I.e. keyframes may or may not be assigned a Frame ID, and any frames preceding a keyframe must still be inlcuded in the feedback if requested by the media sender - despite the keyframe being a new recovery point.<a href="#section-8-3" class="pilcrow">¶</a></p>
+<p id="section-8-3">Also note that no exceptions are made for keyframes. I.e. keyframes may or may not be assigned a Frame ID, and any frames preceding a keyframe must still be included in the feedback if requested by the media sender - despite the keyframe being a new recovery point.<a href="#section-8-3" class="pilcrow">¶</a></p>
 <p id="section-8-4">The Frame ID sequence (and consequently the feedback messages corresponding to it) is unique per sender/receiver SSRC pair. Thus if a sender or receiver SSRC is changed, a new Frame ID sequence is started and all previous state is discarded. Otherwise no gaps or resets in the Frame ID sequence are allowed.<a href="#section-8-4" class="pilcrow">¶</a></p>
 <div id="mapping_header_extension_to_frames">
 <section id="section-8.1">

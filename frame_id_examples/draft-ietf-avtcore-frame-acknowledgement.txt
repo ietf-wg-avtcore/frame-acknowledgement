@@ -297,7 +297,7 @@ Table of Contents
    In order to request and receive information about decoded frames, we
    must be able to identify them.  The frame acknowledgement header
    extension may contain a Frame ID field for this purpose.  The Frame
-   ID is an 16-bit unsigned integer field, that wraps around to 0 on
+   ID is a 16-bit unsigned integer field, that wraps around to 0 on
    overflow.
 
 6.2.  Frame Acknowledgment Request
@@ -458,7 +458,7 @@ Table of Contents
    that the receiver is requesting a resync frame.  When set to 0,
    acknowledgement is triggered by sender request.  If R=1, Start Frame
    ID should indicate latest decoded frame ID and status vector
-   contatining frames upto latest received Frame ID assuming length
+   containing frames up to the latest received Frame ID assuming length
    field is less than 256.
 
 7.1.2.  Reserved (7 bits)
@@ -512,7 +512,7 @@ Table of Contents
 
    Also note that no exceptions are made for keyframes.  I.e. keyframes
    may or may not be assigned a Frame ID, and any frames preceding a
-   keyframe must still be inlcuded in the feedback if requested by the
+   keyframe must still be included in the feedback if requested by the
    media sender - despite the keyframe being a new recovery point.
 
    The Frame ID sequence (and consequently the feedback messages
