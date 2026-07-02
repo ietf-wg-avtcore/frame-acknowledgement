@@ -40,11 +40,6 @@ author:
     email: smajali@nvidia.com
 
 normative:
-  DD:
-    target: https://aomediacodec.github.io/av1-rtp-spec/#dependency-descriptor-rtp-header-extension
-    title: Dependency Descriptor RTP Header Extension
-    author:
-      org: AOM
   IANARTCP:
     target: https://www.iana.org/assignments/rtp-parameters/rtp-parameters.xhtml#rtp-parameters-4
     title: FMT Values for RTPFB Payload Types
@@ -71,6 +66,17 @@ informative:
   LNTF:
     target: https://www.ietf.org/archive/id/draft-majali-avtcore-lntf-feedback-message-00.html
     title: RTCP feedback Message for Loss Notification
+  DD:
+    target: https://aomediacodec.github.io/av1-rtp-spec/#dependency-descriptor-rtp-header-extension
+    title: Dependency Descriptor RTP Header Extension
+    author:
+      org: AOM
+  VFM:
+    target: https://datatracker.ietf.org/doc/rfc9626/
+    title: Video Frame Marking RTP Header Extension
+    author:
+      org: IETF
+
 
 
 --- abstract
@@ -99,7 +105,7 @@ Note that it is allowed to report a frame as decoded even if the decode process 
 
 {::boilerplate bcp14-tagged}
 
-For the purposes of this document, a "frame" is defined as any decodable unit of bitstream data that results in the update to the codec state (e.g. reference buffers, entropy tables, etc) that can be used as a reference for any subsequent decodable unit of bitstream data. Typically that will be a full frame, but also include cases such as a "no show" frame intended for later reference or even a part of a frame such as a tile or a slice if it is independently decodable and makes updates to encoder state that other tiles/frames can later reference.
+For the purposes of this document, a "frame" is defined as any decodable unit of bitstream data that results in an update to the codec state (e.g. reconstructed reference buffers, entropy tables, etc) that can be used as a reference for any subsequent decodable unit of bitstream data. Typically that will be a full frame, but also include cases such as a "no show" frame intended for later reference or even a part of a frame such as a tile or a slice if it is independently decodable and makes updates to codec state that subsequent objects in the bitstream can later use as reference. The exact definition is intentionally left open in order to allow a codec agnostic signaling protocol, but it is important that the sender and receiver agree on what constitutes a frame.
 
 # Applicability
 
@@ -147,11 +153,11 @@ The messages in this proposal are intended to fulfill the following requirements
 # Frame Acknowledgment Extension
 
 The Frame Acknowledgement extension is an RTP header extension used both to identify frames and request feedback about the remote state.
-It SHOULD appear on the last packet of a video frame, and MUST NOT appear more than once on a single frame.
+It MUST appear on the last packet of a video frame, and MUST NOT appear more than once on a single frame.
 
 ## Frame Identifier
 
-In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is a 16-bit unsigned integer field, that wraps around to 0 on overflow.
+In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is an 16-bit unsigned integer field, that wraps around to 0 on overflow.
 
 ## Frame Acknowledgment Request
 
@@ -261,7 +267,7 @@ The flags byte contains the Resync Request Flag and reserved bits for future use
 
 ### Resync Request Flag (1 bit)
 
-The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, Start Frame ID should indicate latest decoded frame ID and status vector containing frames up to the latest received Frame ID assuming length field is less than 256.
+The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, Start Frame ID should indicate latest decoded frame ID and status vector contatining frames upto latest received Frame ID assuming length field is less than 256.
 
 ### Reserved (7 bits)
 
@@ -289,13 +295,26 @@ As stated above, the sender MUST increment the Frame ID by one for each new fram
 
 Since feedback is only really necessary for frames which the codec stores in a reference buffer pending future use, the number of outstanding frames is in practice limited by the number of available reference buffers. E.g. for AV1, the upper limit will be 8. Although the optimal behavior will be application dependent, it is often advisable to spread reference buffer usage out across an RTT and to cull earlier buffer usage once later frames have been acknowledged.
 
-Also note that no exceptions are made for keyframes. I.e. keyframes may or may not be assigned a Frame ID, and any frames preceding a keyframe must still be included in the feedback if requested by the media sender - despite the keyframe being a new recovery point.
+Also note that no exceptions are made for keyframes. I.e. keyframes may or may not be assigned a Frame ID, and any frames preceding a keyframe must still be inlcuded in the feedback if requested by the media sender - despite the keyframe being a new recovery point.
 
 The Frame ID sequence (and consequently the feedback messages corresponding to it) is unique per sender/receiver SSRC pair. Thus if a sender or receiver SSRC is changed, a new Frame ID sequence is started and all previous state is discarded. Otherwise no gaps or resets in the Frame ID sequence are allowed.
 
+## Mapping Header Extension to Frames {#mapping_header_extension_to_frames}
+
+As specified by the definition in [Conventions and Definitions](#conventions_and_definitions), a frame is "any decodable unit of bitstream data that results in an update to the codec state that can be used as a reference for any subsequent decodable unit of bitstream data". This has consequences for how to tag the Frame Acknowledgement header extension to an RTP packet.
+
+Firstly, the Frame Acknowledgement header extension MUST uniquely identify a single frame. 
+
+Since we allow only one Frame Acknowledgement header extension per packet, we can identify no more than one frame per packet. Should a packet contain a bundle of multiple frames, the Frame ID in the header extension refers to the last frame in the bundle.
+
+Secondly, the Frame ID always refers to the minimum independently decodable unit of data in the packet.
+This means that if for instance spatial layers are used, where there are multiple frames per temporal unit, a Frame ID set on the last packet refers only to the last layer frame - not the entire "super frame". It is up to the sender to determine which subset of data it is interested in. If all layers should be individually acknowledged (e.g. when independent simulcast-style layers are used), then send should mark each individual layer frame with a unique Frame ID.
+
+Similarly, independently decodable sub-regions within a picture (e.g. H.266 Subpictures or AV2 Extended Layers) may be marked with individual Frame IDs if they are packetized such that each sub-region ends in a separate packet.
+
 ## Resync Request Handling
 
-When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it MAY send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded Frame ID up to latest received Frame ID.
+When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it MAY send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded FrameID upto latest received FrameID.
 
 Upon receiving a resync request, the sender SHOULD:
 1. Verify that the decoded Frame ID corresponds to a frame that is still available in its reference buffer.
@@ -310,9 +329,9 @@ When considering a multi-way application with an SFU/SFM-type relay in the middl
 
 ## Using acknowledgement ranges
 
-The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.
+The feedback request menchanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, the only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.
 
-For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
+For instance, imaging the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
 S1: 100 -> 101 (ID = 1) -> 102 -> 103
 S0: 100 -> 101 -> 102 (ID = 2) -> 103
 Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for. This guarantees that the sender is always able to acquire feedback for all frames it has sent.
@@ -560,6 +579,86 @@ The Media Sender detects that no feedback was received for its earlier request. 
 The Media Receiver responds with updated feedback for the requested range, confirming all three Frame IDs (9, 10, 11) have been decoded. The sender now has the confirmation it needed despite the earlier feedback loss.
 
 This mechanism allows the sender to control feedback reliability by re-requesting as needed, providing resilience against both media packet loss and feedback packet loss.
+
+# Appendix B: Frame Definitions Examples
+{:numbered="false"}
+
+The encoder at the sending side will naturally know what constitutes a "frame" that it wants feedback about, but it is vital that the same definition is used at the receiving end, so that it can send feedback for the same objects.
+
+This appendix shows some concrete examples of how to identify a "frame" in accordance with this document, for some commonly available codec types. See also [Mapping Header Extension to Frames](#mapping_header_extension_to_frames).
+
+## Simple RTP
+{:numbered="false"}
+
+In the simplest of cases, with no scalability or other advanced reference structure, no padding packets, nothing fancy at all - one can simply look at the marker bit of the RTP header. If it is set, it indicates the end of a frame and is thus eligible to receive a Frame ID. The caveat being that there is very unclear need for frame acknoledgement in this use case.
+
+## Coded Agnostic Idenitifaction
+{:numbered="false"}
+
+In some applications, metadata provided via RTP header extensions can be used to reason about the frames contained in the packets, without actually having to parse the RTP payload data. This greatly simplifies inferring which "frame" the extension is attached to.
+
+### Video Frame Marking RTP Header Extension
+{:numbered="false"}
+
+If the Video Frame Marking extension {{VFM}} is used to signal frame dependencies, packets with the 'E' bit set indicate that the end of a frame, and are candidates for being assigned a Frame ID.
+
+### Dependency Descriptor RTP Header Extension
+{:numbered="false"}
+
+If the Dependency Descriptor extension {{DD}} is used to signal frame dependencies, packets with the 'end_of_frame' bit set are candidates for being assigned a Frame ID.
+
+## Codec Specific Identification
+{:numbered="false"}
+
+If no codec agnostic header metadata is available, a codec specific payload header likely needs to be parser instead. More than that, if
+
+### The Simple Case
+{:numbered="false"}
+
+In case no spatial SVC is used, i.e. there is only one frame per temporal unit, then figuring out which frame the Frame Acknowledgement extension is attached to ....
+
+
+ahh chucks.
+
+
+can there be cases where the video bitstream ends in a packet prior to the marker bit? Yes. But it doesn't break the simple case. Should be avoided though.
+
+
+How do we handle no-show flags? A no-show is fine - it updates state which is the important bit. A show-existing has little value, but I don't see why you wouldn't allow a frame marking on it.
+
+
+-> Important distinction: add language to say the frame ack extension MUST NOT be put on a discardable packet.
+Consider if this should be moved to the Frame ID considerations section instead.
+
+
+
+
+
+
+
+The VP8 payload descriptor (RFC 7741) has a start-of-frame flag, but does not have an end-of-frame one. Instead, it relies on the RTP marker bit to indicate the end of frame, and thus eligibility of Frame ID.
+
+### VP9
+{:numbered="false"}
+
+The VP9 payload descriptor (RFC 9628) has an 'e' bit indicating end-of-frame, and if this is set, the frame is eligible to receive a Frame ID.
+
+### H.264/AVC
+{:numbered="false"}
+
+The H.264/AVC payload format does not have an explicit end of frame flag. In the base (RFC 6184) version, the end of a frame can often be inferred either through the marker bit or through the E bit of a Fragmentation Unit. However in the scalable (RFC 6190) version, you actually need to observe the transition for of the dependency_id or quality_id to determine frame boundaries.
+
+### H.265/HEVC
+{:numbered="false"}
+
+
+
+
+
+
+
+
+
 
 # Acknowledgments
 {:numbered="false"}
