@@ -32,7 +32,7 @@
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.1
+    wcwidth 0.8.2
 -->
 <link href="draft-ietf-avtcore-frame-acknowledgement.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1242,7 +1242,10 @@ svg {
                 <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-using-acknowledgement-range" class="internal xref">Using acknowledgement ranges</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
-                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-out-of-order-message-handli" class="internal xref">Out-of-order Message Handling</a></p>
+                <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-receiver-state-limits" class="internal xref">Receiver State Limits</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.5">
+                <p id="section-toc.1-1.8.2.5.1"><a href="#section-8.5" class="auto internal xref">8.5</a>.  <a href="#name-out-of-order-message-handli" class="internal xref">Out-of-order Message Handling</a></p>
 </li>
             </ul>
 </li>
@@ -1258,10 +1261,21 @@ svg {
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
                 <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-receiver-triggered-resync" class="internal xref">Receiver-Triggered Resync</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-status-window-size-signalin" class="internal xref">Status Window Size Signaling</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
             <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-state-exhaustion" class="internal xref">State Exhaustion</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-feedback-amplification" class="internal xref">Feedback Amplification</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
             <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
@@ -1407,7 +1421,7 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
       </h2>
 <p id="section-6-1">The Frame Acknowledgement extension is an RTP header extension used both to identify frames and request feedback about the remote state.
 It <span class="bcp14">SHOULD</span> appear on the last packet of a video frame, and <span class="bcp14">MUST NOT</span> appear more than once on a single frame.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="frame-identifier">
+<div id="frame_identifier">
 <section id="section-6.1">
         <h3 id="name-frame-identifier">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-frame-identifier" class="section-name selfRef">Frame Identifier</a>
@@ -1586,7 +1600,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
         <h3 id="name-length-8-bits">
 <a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-length-8-bits" class="section-name selfRef">Length (8 bits)</a>
         </h3>
-<p id="section-7.3-1">An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback information is present, though this <span class="bcp14">SHOULD NOT</span> be sent.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-1">An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback entries are present (e.g., when the requested range has no overlap with the receiver's status window, see <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>).<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="status-vector-variable-length">
@@ -1641,15 +1655,28 @@ An unsigned integer that indicates the number of consecutive frames the sender i
 <p id="section-8.3-2">For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
 S1: 100 -&gt; 101 (ID = 1) -&gt; 102 -&gt; 103
 S0: 100 -&gt; 101 -&gt; 102 (ID = 2) -&gt; 103
-Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for. This guarantees that the sender is always able to acquire feedback for all frames it has sent.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span> when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="out-of-order-message-handling">
+<div id="receiver_state_limits">
 <section id="section-8.4">
-        <h3 id="name-out-of-order-message-handli">
-<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
+        <h3 id="name-receiver-state-limits">
+<a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-receiver-state-limits" class="section-name selfRef">Receiver State Limits</a>
         </h3>
-<p id="section-8.4-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+<p id="section-8.4-1">The receiver maintains a "status window" — a sliding window of contiguous Frame IDs for which it retains decode/receive status. The size of this window (the "status window size") represents the maximum number of consecutive Frame IDs the receiver tracks at any given time. As new Frame IDs are received, the window advances and the oldest entries are discarded.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+<p id="section-8.4-2">The default status window size is 255 frames. A different status window size <span class="bcp14">MAY</span> be negotiated via SDP (see <span><a href="#status_window_size_signaling" class="internal xref">Status Window Size Signaling</a> (<a href="#status_window_size_signaling" class="auto internal xref">Section 9.4</a>)</span>). A receiver <span class="bcp14">MUST</span> be prepared to maintain a status window of at least the negotiated size, or 255 if no value is negotiated.<a href="#section-8.4-2" class="pilcrow">¶</a></p>
+<p id="section-8.4-3">When a new Frame ID is received that would cause the number of tracked Frame IDs to exceed the status window size, the receiver <span class="bcp14">MUST</span> advance the window by discarding the status of the oldest Frame IDs first (FIFO order), retaining only the most recent entries up to the status window size.<a href="#section-8.4-3" class="pilcrow">¶</a></p>
+<p id="section-8.4-4">If the receiver receives a feedback request whose Feedback Start refers to a Frame ID that has fallen outside its status window (i.e., the state for that Frame ID has been discarded), the receiver <span class="bcp14">MUST</span> respond with a feedback message where the Start Frame ID is set to the oldest Frame ID still within its status window. The Length and status vector cover the intersection of the requested range and the receiver's available state. If there is no overlap between the requested range and the receiver's status window (i.e., the entire requested range has been discarded), the receiver <span class="bcp14">MUST</span> respond with a feedback message with the Start Frame ID set to the Feedback Start from the sender's request and Length set to 0. A sender that receives a feedback response with a Start Frame ID newer than what it requested or a Length of 0 <span class="bcp14">SHOULD</span> interpret this as an indication that the receiver has discarded state for the older frames and <span class="bcp14">MUST NOT</span> use those older frames as references.<a href="#section-8.4-4" class="pilcrow">¶</a></p>
+<p id="section-8.4-5">If the negotiated status window size exceeds 255 frames and the receiver needs to report status for more Frame IDs than a single feedback message can carry (limited by the 8-bit Length field to 255 entries), the receiver <span class="bcp14">MUST</span> split the feedback across multiple RTCP Frame Acknowledgement Feedback messages, each covering a contiguous subset of the requested range.<a href="#section-8.4-5" class="pilcrow">¶</a></p>
+<p id="section-8.4-6">A sender <span class="bcp14">SHOULD</span> issue feedback requests regularly and <span class="bcp14">SHOULD NOT</span> allow the number of unacknowledged Frame IDs to exceed the receiver's status window size. If the sender fails to do so, the receiver will discard state for older frames as described above.<a href="#section-8.4-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="out_of_order_handling">
+<section id="section-8.5">
+        <h3 id="name-out-of-order-message-handli">
+<a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
+        </h3>
+<p id="section-8.5-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1717,6 +1744,28 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <p id="section-9.3-8">The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps use-cases to choose how long receiver need to wait before triggering resync request. Media sender can adjust its interval to request frame acknowledgement feedback if "resync-timeout" based resync feedback is supported by receiver. Media sender can avoid sending frequent frame acknowledgement requests depending on the use-case. Additionally sender could consider RTT during handling of resync feedbacks.<a href="#section-9.3-8" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="status_window_size_signaling">
+<section id="section-9.4">
+        <h3 id="name-status-window-size-signalin">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-status-window-size-signalin" class="section-name selfRef">Status Window Size Signaling</a>
+        </h3>
+<p id="section-9.4-1">A receiver <span class="bcp14">MAY</span> signal the maximum number of frame statuses it is prepared to maintain (its status window size) using the "status-window-size" parameter on the "frame-acknowledgement" rtcp-fb attribute.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-2">Syntax:<a href="#section-9.4-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.4-3">
+<pre>
+   a=rtcp-fb:&lt;payload type&gt; frame-acknowledgement;status-window-size=&lt;N&gt;
+</pre><a href="#section-9.4-3" class="pilcrow">¶</a>
+</div>
+<p id="section-9.4-4">The value N is an integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. N <span class="bcp14">MUST</span> be in the range 1 to 32767 inclusive. The upper bound follows from the Frame ID being a 16-bit field that wraps (see <span><a href="#frame_identifier" class="internal xref">Frame Identifier</a> (<a href="#frame_identifier" class="auto internal xref">Section 6.1</a>)</span>): ordering wrapped Frame IDs relies on the same serial-number arithmetic used for RTP sequence numbers (see <span>[<a href="#RFC3550" class="cite xref">RFC3550</a>]</span>, Appendix A.1), which is only unambiguous when the values being compared are less than 2^15 (32768) apart. Values larger than 255 are permitted; in such cases, the receiver <span class="bcp14">MUST</span> split feedback across multiple RTCP messages as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
+<p id="section-9.4-5">When used in an offer/answer context, the offerer <span class="bcp14">MAY</span> include a "status-window-size" value to propose a maximum status window size. The answerer <span class="bcp14">MUST</span> respond with a value less than or equal to the offered value. Both the offered and answered values <span class="bcp14">MUST</span> be within the range 1 to 32767 inclusive; a recipient that receives a "status-window-size" value outside this range <span class="bcp14">MUST</span> ignore the parameter and use the default value of 255. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 <span class="bcp14">SHALL</span> be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender <span class="bcp14">MUST</span> ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.<a href="#section-9.4-5" class="pilcrow">¶</a></p>
+<p id="section-9.4-6">If multiple parameters are present, they are separated by semicolons:<a href="#section-9.4-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.4-7">
+<pre>
+   a=rtcp-fb:96 frame-acknowledgement;resync-timeout=500;status-window-size=64
+</pre><a href="#section-9.4-7" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="security-considerations">
@@ -1726,6 +1775,24 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
       </h2>
 <p id="section-10-1">The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially in an indirect way which frames the sender sees as important for recovery.<a href="#section-10-1" class="pilcrow">¶</a></p>
 <p id="section-10-2">This data should however not pose any significant privacy or security risks.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<div id="state-exhaustion">
+<section id="section-10.1">
+        <h3 id="name-state-exhaustion">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-state-exhaustion" class="section-name selfRef">State Exhaustion</a>
+        </h3>
+<p id="section-10.1-1">A misbehaving sender could attempt to exhaust receiver memory by continuously assigning Frame IDs without ever issuing feedback requests, causing the receiver to accumulate frame state indefinitely. Receivers <span class="bcp14">MUST</span> implement a status window as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span> and discard state for older frames when this window is exceeded. The maximum state a compliant receiver will maintain is bounded by its status window size, which limits memory consumption to a small, predictable amount regardless of sender behavior.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="feedback-amplification">
+<section id="section-10.2">
+        <h3 id="name-feedback-amplification">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-feedback-amplification" class="section-name selfRef">Feedback Amplification</a>
+        </h3>
+<p id="section-10.2-1">A sender could potentially request feedback repeatedly for the same set of Frame IDs, causing the receiver to generate RTCP feedback traffic. This concern is mitigated by the RTCP feedback timing rules defined in <span>[<a href="#RFC4585" class="cite xref">RFC4585</a>]</span> (Sections 3.3 and 3.5), which govern when and how often immediate and early feedback can be transmitted. Receivers <span class="bcp14">MUST</span> comply with these timing rules regardless of how frequently feedback is requested.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-2">When a receiver defers transmission of a feedback message to comply with these timing rules (or due to bandwidth constraints), its status window continues to advance as new Frame IDs are received in the interim. The receiver <span class="bcp14">MUST</span> generate the contents of a deferred feedback message based on the state of its status window at the time the message is sent, not at the time the request was received. Consequently, frames that have fallen outside the status window between request and transmission are reported using the shifted Start Frame ID, reduced range, or Length=0 rules defined in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span>. For example, if a request for Frame IDs 1 through 4 cannot be answered until the status window has advanced to 3 through 6, the receiver responds with feedback covering only Frame IDs 3 and 4.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
+<p id="section-10.2-3">If a receiver receives a new feedback request before it has transmitted a response to an earlier, still-pending request, the receiver <span class="bcp14">SHOULD</span> drop the older request and respond only to the most recent one. This complements the supersession rule in <span><a href="#out_of_order_handling" class="internal xref">Out-of-order Message Handling</a> (<a href="#out_of_order_handling" class="auto internal xref">Section 8.5</a>)</span>, and ensures that a sender requesting feedback faster than the timing rules permit responses does not cause a backlog of feedback messages to accumulate at the receiver.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="iana-considerations">
@@ -1780,6 +1847,10 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <dt id="LNTF">[LNTF]</dt>
         <dd>
 <span class="refTitle">"RTCP feedback Message for Loss Notification"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-majali-avtcore-lntf-feedback-message-00.html">https://www.ietf.org/archive/id/draft-majali-avtcore-lntf-feedback-message-00.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3550">[RFC3550]</dt>
+        <dd>
+<span class="refAuthor">Schulzrinne, H.</span>, <span class="refAuthor">Casner, S.</span>, <span class="refAuthor">Frederick, R.</span>, and <span class="refAuthor">V. Jacobson</span>, <span class="refTitle">"RTP: A Transport Protocol for Real-Time Applications"</span>, <span class="seriesInfo">STD 64</span>, <span class="seriesInfo">RFC 3550</span>, <span class="seriesInfo">DOI 10.17487/RFC3550</span>, <time datetime="2003-07" class="refDate">July 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3550">https://www.rfc-editor.org/rfc/rfc3550</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC4585">[RFC4585]</dt>
         <dd>
