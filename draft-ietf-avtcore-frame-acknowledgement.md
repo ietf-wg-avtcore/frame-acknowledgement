@@ -149,7 +149,7 @@ The messages in this proposal are intended to fulfill the following requirements
 The Frame Acknowledgement extension is an RTP header extension used both to identify frames and request feedback about the remote state.
 It SHOULD appear on the last packet of a video frame, and MUST NOT appear more than once on a single frame.
 
-## Frame Identifier
+## Frame Identifier {#frame_identifier}
 
 In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is a 16-bit unsigned integer field, that wraps around to 0 on overflow.
 
@@ -273,7 +273,7 @@ The first Frame ID (inclusive) for which feedback is provided in this message. T
 
 ## Length (8 bits)
 
-An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback information is present, though this SHOULD NOT be sent.
+An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback entries are present (e.g., when the requested range has no overlap with the receiver's status window, see [Receiver State Limits](#receiver_state_limits)).
 
 ## status vector (variable length)
 
@@ -315,9 +315,23 @@ The feedback request mechanism has the ability to respond with the status of a r
 For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
 S1: 100 -> 101 (ID = 1) -> 102 -> 103
 S0: 100 -> 101 -> 102 (ID = 2) -> 103
-Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for. This guarantees that the sender is always able to acquire feedback for all frames it has sent.
+Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in [Receiver State Limits](#receiver_state_limits) when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.
 
-## Out-of-order Message Handling
+## Receiver State Limits {#receiver_state_limits}
+
+The receiver maintains a "status window" — a sliding window of contiguous Frame IDs for which it retains decode/receive status. The size of this window (the "status window size") represents the maximum number of consecutive Frame IDs the receiver tracks at any given time. As new Frame IDs are received, the window advances and the oldest entries are discarded.
+
+The default status window size is 255 frames. A different status window size MAY be negotiated via SDP (see [Status Window Size Signaling](#status_window_size_signaling)). A receiver MUST be prepared to maintain a status window of at least the negotiated size, or 255 if no value is negotiated.
+
+When a new Frame ID is received that would cause the number of tracked Frame IDs to exceed the status window size, the receiver MUST advance the window by discarding the status of the oldest Frame IDs first (FIFO order), retaining only the most recent entries up to the status window size.
+
+If the receiver receives a feedback request whose Feedback Start refers to a Frame ID that has fallen outside its status window (i.e., the state for that Frame ID has been discarded), the receiver MUST respond with a feedback message where the Start Frame ID is set to the oldest Frame ID still within its status window. The Length and status vector cover the intersection of the requested range and the receiver's available state. If there is no overlap between the requested range and the receiver's status window (i.e., the entire requested range has been discarded), the receiver MUST respond with a feedback message with the Start Frame ID set to the Feedback Start from the sender's request and Length set to 0. A sender that receives a feedback response with a Start Frame ID newer than what it requested or a Length of 0 SHOULD interpret this as an indication that the receiver has discarded state for the older frames and MUST NOT use those older frames as references.
+
+If the negotiated status window size exceeds 255 frames and the receiver needs to report status for more Frame IDs than a single feedback message can carry (limited by the 8-bit Length field to 255 entries), the receiver MUST split the feedback across multiple RTCP Frame Acknowledgement Feedback messages, each covering a contiguous subset of the requested range.
+
+A sender SHOULD issue feedback requests regularly and SHOULD NOT allow the number of unacknowledged Frame IDs to exceed the receiver's status window size. If the sender fails to do so, the receiver will discard state for older frames as described above.
+
+## Out-of-order Message Handling {#out_of_order_handling}
 
 Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.
 
@@ -377,11 +391,43 @@ Example attribute lines in SDP (Only one of the format must be present per paylo
 
 The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps use-cases to choose how long receiver need to wait before triggering resync request. Media sender can adjust its interval to request frame acknowledgement feedback if "resync-timeout" based resync feedback is supported by receiver. Media sender can avoid sending frequent frame acknowledgement requests depending on the use-case. Additionally sender could consider RTT during handling of resync feedbacks.
 
+## Status Window Size Signaling {#status_window_size_signaling}
+
+A receiver MAY signal the maximum number of frame statuses it is prepared to maintain (its status window size) using the "status-window-size" parameter on the "frame-acknowledgement" rtcp-fb attribute.
+
+Syntax:
+
+~~~
+   a=rtcp-fb:<payload type> frame-acknowledgement;status-window-size=<N>
+~~~
+
+The value N is an integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. N MUST be in the range 1 to 32767 inclusive. The upper bound follows from the Frame ID being a 16-bit field that wraps (see [Frame Identifier](#frame_identifier)): ordering wrapped Frame IDs relies on the same serial-number arithmetic used for RTP sequence numbers (see {{?RFC3550}}, Appendix A.1), which is only unambiguous when the values being compared are less than 2^15 (32768) apart. Values larger than 255 are permitted; in such cases, the receiver MUST split feedback across multiple RTCP messages as described in [Receiver State Limits](#receiver_state_limits).
+
+When used in an offer/answer context, the offerer MAY include a "status-window-size" value to propose a maximum status window size. The answerer MUST respond with a value less than or equal to the offered value. Both the offered and answered values MUST be within the range 1 to 32767 inclusive; a recipient that receives a "status-window-size" value outside this range MUST ignore the parameter and use the default value of 255. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 SHALL be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender MUST ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.
+
+If multiple parameters are present, they are separated by semicolons:
+
+~~~
+   a=rtcp-fb:96 frame-acknowledgement;resync-timeout=500;status-window-size=64
+~~~
+
 # Security Considerations
 
 The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially in an indirect way which frames the sender sees as important for recovery.
 
 This data should however not pose any significant privacy or security risks.
+
+## State Exhaustion
+
+A misbehaving sender could attempt to exhaust receiver memory by continuously assigning Frame IDs without ever issuing feedback requests, causing the receiver to accumulate frame state indefinitely. Receivers MUST implement a status window as described in [Receiver State Limits](#receiver_state_limits) and discard state for older frames when this window is exceeded. The maximum state a compliant receiver will maintain is bounded by its status window size, which limits memory consumption to a small, predictable amount regardless of sender behavior.
+
+## Feedback Amplification
+
+A sender could potentially request feedback repeatedly for the same set of Frame IDs, causing the receiver to generate RTCP feedback traffic. This concern is mitigated by the RTCP feedback timing rules defined in {{?RFC4585}} (Sections 3.3 and 3.5), which govern when and how often immediate and early feedback can be transmitted. Receivers MUST comply with these timing rules regardless of how frequently feedback is requested.
+
+When a receiver defers transmission of a feedback message to comply with these timing rules (or due to bandwidth constraints), its status window continues to advance as new Frame IDs are received in the interim. The receiver MUST generate the contents of a deferred feedback message based on the state of its status window at the time the message is sent, not at the time the request was received. Consequently, frames that have fallen outside the status window between request and transmission are reported using the shifted Start Frame ID, reduced range, or Length=0 rules defined in [Receiver State Limits](#receiver_state_limits). For example, if a request for Frame IDs 1 through 4 cannot be answered until the status window has advanced to 3 through 6, the receiver responds with feedback covering only Frame IDs 3 and 4.
+
+If a receiver receives a new feedback request before it has transmitted a response to an earlier, still-pending request, the receiver SHOULD drop the older request and respond only to the most recent one. This complements the supersession rule in [Out-of-order Message Handling](#out_of_order_handling), and ensures that a sender requesting feedback faster than the timing rules permit responses does not cause a backlog of feedback messages to accumulate at the receiver.
 
 # IANA Considerations
 
