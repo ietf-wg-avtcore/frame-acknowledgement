@@ -5,15 +5,15 @@
 avtcore WG                                                     E. Språng
 Internet-Draft                                                    Google
 Intended status: Informational                             G. S. Chandok
-Expires: 29 November 2026                                          Apple
+Expires: 7 January 2027                                            Apple
                                                                S. Majali
                                                                   Nvidia
-                                                             28 May 2026
+                                                             6 July 2026
 
 
       RTCP Feedback Message and Request Mechanism for Frame-level
                             Acknowledgement
-              draft-ietf-avtcore-frame-acknowledgement-01
+              draft-ietf-avtcore-frame-acknowledgement-02
 
 Abstract
 
@@ -62,7 +62,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 29 November 2026.
+   This Internet-Draft will expire on 7 January 2027.
 
 Copyright Notice
 
