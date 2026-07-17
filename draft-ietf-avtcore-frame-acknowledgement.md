@@ -174,7 +174,7 @@ For a Two-Byte Header (as defined in {{?RFC5285}}, Section 4.3), the `ID` field 
      0
      0 1 2 3 4 5 6 7
     +-+-+-+-+-+-+-+-+
-    |FFR| Reserved  |  (First byte of extension data)
+    |FFR|R| Reserved|  (First byte of extension data)
     +-+-+-+-+-+-+-+-+
     |   Frame ID    |  (OPTIONAL, see FFR)
     +-+-+-+-+-+-+-+-+
@@ -213,6 +213,10 @@ This field is located in the first byte of the extension data. It indicates the 
 *   **11: Reserved for future use.**
 
 The remaining 6 bits of the FFR/Reserved byte are reserved and SHOULD be set to 0.
+
+### R: Receive Indication Request (1 bit)
+
+If this field is true, it signals that the sender wants the feedback to indicate if a frame was received separately from if it was both received and decoded.
 
 ### Frame ID (16 bits)
 
@@ -277,9 +281,26 @@ An unsigned integer denoting how many consecutive frames, starting from Start Fr
 
 ## status vector (variable length)
 
-A bit vector of the size indicated by the Length field. Each bit corresponds to a Frame ID, starting from Start Frame ID and incrementing by one for each subsequent bit.
+A vector of symbols indicating the status for each frame starting from Frame ID. The number of symbols is indicated by the Length field. The Receive Indiator Request flag (R) of the last received Frame Acknowledgement Request (or 0, if none received) indicates the site of each symbol.
+
+### When R = 0:
+
+Each symbol is 1 bit in size.
+
 *   A value of **0** indicates the frame has not been received or has not been decoded (or is not expected to be decoded).
 *   A value of **1** indicates the frame has been received and has been or will be decoded.
+
+### When R = 1:
+
+Each symbol is 2 bits in size.
+
+*   A value of **00** indicates the frame has not been fully received (i.e. entirely or partially lost).
+*   A value of **01** indicates the frame has been received, but not yet decoded.
+*   A value of **10** indicates the frame has been received and decoded successfully.
+
+The value **11** is reserved for future use.
+
+### Padding
 
 The status vector MUST be padded with 0 to align to the next 32-bit boundary if its length is not a multiple of 32 bits. This padding is not included in the Length field but is included in the RTCP packet's length field.
 
