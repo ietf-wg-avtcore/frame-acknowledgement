@@ -144,7 +144,7 @@ The messages in this proposal are intended to fulfill the following requirements
 9. Resynchronization Support
   The receiver should be able to request frames encoded with previously acknowledged references when the decoder state becomes out of sync, enabling efficient recovery without requiring a full keyframe.
 
-# Frame Acknowledgment Extension
+# Frame Acknowledgment Extension {#frame_acknowledgement_extension}
 
 The Frame Acknowledgement extension is an RTP header extension used both to identify frames and request feedback about the remote state.
 It SHOULD appear on the last packet of a video frame, and MUST NOT appear more than once on a single frame.
@@ -159,6 +159,14 @@ In order to get feedback on the state of the remote decoder, the sender actively
 The feedback request comprises a Start Frame ID and Length field. Specifying the range explicitly has several advantages, including reliable delivery of the feedback and the ability to signal state relating to multiple independent streams interleaved within a single SSRC.
 
 If a new Frame Acknowledgement Request is sent with an incremented Feedback Start, all status values prior to that Frame ID are considered as acknowledged and can be culled by the receiver. A sender MUST NOT request feedback prior to either the last acknowledged Frame ID or the start of the stream.
+
+## Feedback Requests Without Frame ID {#feedback_request_without_frame_id}
+
+Either a feedback request or the resulting feedback message may be lost. To make the feedback reliable, a sender can repeat a feedback request, either proactively (e.g., by sending each request twice, with some spacing in time, as is common for protocols running over UDP) or reactively (e.g., if no feedback message has been received within a timeout based on the round-trip time, or if packet loss is detected). See also the example in [Appendix A](#feedback_loss_and_recovery).
+
+A sender may not have a new frame to send when it wants to repeat a request, or may not be interested in feedback for its next frame. For this reason, a feedback request can also be sent without a Frame ID, using FFR=11. Such a request does not identify a frame, and is therefore not subject to the placement requirements in [Frame Acknowledgment Extension](#frame_acknowledgement_extension). Instead, it MAY be attached to any RTP packet of the RTP stream, e.g., any packet of a frame, or a packet that carries no media payload, such as a padding-only packet. The RTP timestamp, marker bit and payload of that packet have no significance for the request. If the request is attached to a packet of an associated retransmission stream {{?RFC4588}}, it refers to the Frame IDs of the original media stream. Receivers MUST process the Frame Acknowledgement header extension also in packets that do not carry any media payload.
+
+A request with FFR=11 MUST NOT include Frame IDs that the sender has not yet sent. Apart from not carrying a Frame ID, it is processed in the same way as a request with FFR=10. In particular, status values prior to the Feedback Start are considered as acknowledged, and a Feedback Length of 0 can be used if no specific frames need feedback but an acknowledgement point needs to be set.
 
 ## Frame Acknowledgment Request Data Layout
 
@@ -188,6 +196,23 @@ For a Two-Byte Header (as defined in {{?RFC5285}}, Section 4.3), the `ID` field 
     +-+-+-+-+-+-+-+-+
 ~~~
 
+When FFR is 11, there is no Frame ID, and the Feedback Start field directly follows the FFR/Reserved byte:
+
+~~~
+ Extension Data (FFR = 11):
+     0
+     0 1 2 3 4 5 6 7
+    +-+-+-+-+-+-+-+-+
+    |FFR| Reserved  |  (First byte of extension data)
+    +-+-+-+-+-+-+-+-+
+    |   Fb. Start   |
+    +-+-+-+-+-+-+-+-+
+    | Fb. Start cont|
+    +-+-+-+-+-+-+-+-+
+    |  Fb. Length   |
+    +-+-+-+-+-+-+-+-+
+~~~
+
 ### FFR: FrameID / Feedback Request (2 bits)
 
 This field is located in the first byte of the extension data. It indicates the presence and meaning of the subsequent optional fields. The total number of bytes for the extension data (and thus the value of `N` for the one-byte header's `len` field, or the `length` field for two-byte headers) depends on the FFR value:
@@ -210,7 +235,12 @@ This field is located in the first byte of the extension data. It indicates the 
     For one-byte header: `len` = 5.
     For two-byte header: `length` = 6.
     This implies both a frame marking with Frame ID and an independent feedback request for the specified range.
-*   **11: Reserved for future use.**
+*   **11: Independent feedback request only.**
+    The FFR/Reserved byte is followed by three bytes: a two-byte Feedback Start and a one-byte Feedback Length field.
+    Total extension data bytes = 4 (FFR/Reserved + Feedback Start + Feedback Length).
+    For one-byte header: `len` = 3.
+    For two-byte header: `length` = 4.
+    This is a feedback request for the specified range that does not identify a frame. See [Feedback Requests Without Frame ID](#feedback_request_without_frame_id).
 
 The remaining 6 bits of the FFR/Reserved byte are reserved and SHOULD be set to 0.
 
@@ -221,12 +251,12 @@ An unsigned integer that uniquely identifies a frame. It MUST be incremented by 
 
 ### Feedback Start (16 bits)
 
-Present if FFR is 10.
+Present if FFR is 10 or 11.
 An unsigned integer that corresponds to the first Frame ID (inclusive) the sender is requesting feedback for. It wraps around to 0 on overflow.
 
 ### Feedback Length (8 bits)
 
-Present if FFR is 10.
+Present if FFR is 10 or 11.
 An unsigned integer that indicates the number of consecutive frames the sender is requesting feedback for, starting from Feedback Start. A value of 0 means no frames are being requested. A value of 1 means only the frame identified by Feedback Start is requested. The range is Feedback Start to Feedback Start + Feedback Length - 1, inclusive, with wrap-around logic applied to Frame IDs.
 
 Note that since the Frame ID and Feedback Start are 16-bit fields that wrap, care must be taken when calculating ranges. For example, a request with Feedback Start = 65534 and Feedback Length = 3 indicates the sender is requesting feedback for frames with Frame IDs 65534, 65535, and 0.
@@ -334,6 +364,8 @@ A sender SHOULD issue feedback requests regularly and SHOULD NOT allow the numbe
 ## Out-of-order Message Handling {#out_of_order_handling}
 
 Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.
+
+When applying this rule, a previously processed request without a Frame ID (FFR=11) is considered to have a Frame ID equal to the last Frame ID in its requested range. A repeated request for the same range is thus processed again, while a delayed copy of a request that has been superseded by a request for a later range is ignored.
 
 # SDP Signaling {#sdp_signaling}
 
@@ -577,7 +609,7 @@ Frames at timestamps 2100 and 2200 are sent without the Frame Acknowledgement ex
 
 If the Media Sender no longer had the frame at timestamp 2000 available in its reference buffer, it would instead encode and send a keyframe (IDR frame) to allow the receiver to resynchronize.
 
-## Feedback Loss and Recovery
+## Feedback Loss and Recovery {#feedback_loss_and_recovery}
 {:numbered="false"}
 
 The Frame Acknowledgement mechanism provides resilience against lost feedback messages through re-requests.
@@ -604,6 +636,27 @@ Media Sender                              Media Receiver
 The Media Sender detects that no feedback was received for its earlier request. After a timeout when sending new frames, it re-requests feedback for Frame IDs 9-11 by sending the frame with ID=11 using FFR=10, Feedback Start=9, and Feedback Length=3.
 
 The Media Receiver responds with updated feedback for the requested range, confirming all three Frame IDs (9, 10, 11) have been decoded. The sender now has the confirmation it needed despite the earlier feedback loss.
+
+Alternatively, the Media Sender can re-request feedback without waiting for a new frame, by attaching a feedback request without a Frame ID (FFR=11) to any RTP packet of the stream, such as a padding-only packet:
+
+~~~
+Media Sender                              Media Receiver
+    |                                          |
+    |--- Frame TS=1000 (FFR=10, ID=10, ------->|
+    |    FbStart=9, FbLen=2)                   |
+    |                                          |
+    |    X<-- RTCP Feedback (Start=9, ---------|
+    |  LOST   Len=2, Vector=11)                |
+    |                                          |
+    |--- Padding (FFR=11, -------------------->|
+    |    FbStart=9, FbLen=2)                   |
+    |                                          |
+    |<-- RTCP Feedback (R=0, Start=9, ---------|
+    |    Len=2, Vector=11)                     |
+    |                                          |
+~~~
+
+The Media Receiver processes the request in the same way as before, and responds with feedback for Frame IDs 9 and 10. No new Frame ID is assigned.
 
 This mechanism allows the sender to control feedback reliability by re-requesting as needed, providing resilience against both media packet loss and feedback packet loss.
 
