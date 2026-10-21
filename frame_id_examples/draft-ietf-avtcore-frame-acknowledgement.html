@@ -12,27 +12,27 @@
        This document describes a mechanism for signaling which video frames have been received and decoded by a remote peer. It comprises an RTCP feedback message and an RTP header extension used to request said feedback. 
        One of the main use cases for this data is to implement various forms of Long Term Reference (LTR) reference structures. Additionally, the mechanism provides a way for receivers to request resynchronization frames that reference acknowledged frames, enabling efficient recovery from partial or full frame loss without requiring a full keyframe. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="RTP" name="keyword">
 <meta content="RTCP" name="keyword">
 <meta content="Header Extension" name="keyword">
 <meta content="Video" name="keyword">
 <meta content="LTR" name="keyword">
-<meta content="draft-ietf-avtcore-frame-acknowledgement-01" name="ietf.draft">
+<meta content="draft-ietf-avtcore-frame-acknowledgement-02" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
-    Python 3.14.5
-    ConfigArgParse 1.7.5
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.0
+    platformdirs 4.13.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.1
+    wcwidth 0.9.2
 -->
 <link href="draft-ietf-avtcore-frame-acknowledgement.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -68,7 +68,6 @@
   src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: italic;
@@ -117,7 +116,6 @@
   src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -182,7 +180,6 @@
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 }
 
 @font-face {
@@ -1051,11 +1048,11 @@ svg {
 <thead><tr>
 <td class="left">Internet-Draft</td>
 <td class="center">Video Frame Acknowledgement</td>
-<td class="right">May 2026</td>
+<td class="right">July 2026</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Språng, et al.</td>
-<td class="center">Expires 29 November 2026</td>
+<td class="center">Expires 7 January 2027</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1065,15 +1062,15 @@ svg {
 <dt class="label-workgroup">Workgroup:</dt>
 <dd class="workgroup">avtcore WG</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-ietf-avtcore-frame-acknowledgement-01</dd>
+<dd class="internet-draft">draft-ietf-avtcore-frame-acknowledgement-02</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-05-28" class="published">28 May 2026</time>
+<time datetime="2026-07-06" class="published">6 July 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-11-29">29 November 2026</time></dd>
+<dd class="expires"><time datetime="2027-01-07">7 January 2027</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1132,7 +1129,7 @@ svg {
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 29 November 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 January 2027.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1245,7 +1242,10 @@ svg {
                 <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-using-acknowledgement-range" class="internal xref">Using acknowledgement ranges</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.5">
-                <p id="section-toc.1-1.8.2.5.1"><a href="#section-8.5" class="auto internal xref">8.5</a>.  <a href="#name-out-of-order-message-handli" class="internal xref">Out-of-order Message Handling</a></p>
+                <p id="section-toc.1-1.8.2.5.1"><a href="#section-8.5" class="auto internal xref">8.5</a>.  <a href="#name-receiver-state-limits" class="internal xref">Receiver State Limits</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.6">
+                <p id="section-toc.1-1.8.2.6.1"><a href="#section-8.6" class="auto internal xref">8.6</a>.  <a href="#name-out-of-order-message-handli" class="internal xref">Out-of-order Message Handling</a></p>
 </li>
             </ul>
 </li>
@@ -1261,10 +1261,21 @@ svg {
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.3">
                 <p id="section-toc.1-1.9.2.3.1"><a href="#section-9.3" class="auto internal xref">9.3</a>.  <a href="#name-receiver-triggered-resync" class="internal xref">Receiver-Triggered Resync</a></p>
 </li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9.2.4">
+                <p id="section-toc.1-1.9.2.4.1"><a href="#section-9.4" class="auto internal xref">9.4</a>.  <a href="#name-status-window-size-signalin" class="internal xref">Status Window Size Signaling</a></p>
+</li>
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
             <p id="section-toc.1-1.10.1"><a href="#section-10" class="auto internal xref">10</a>. <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.1">
+                <p id="section-toc.1-1.10.2.1.1"><a href="#section-10.1" class="auto internal xref">10.1</a>.  <a href="#name-state-exhaustion" class="internal xref">State Exhaustion</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10.2.2">
+                <p id="section-toc.1-1.10.2.2.1"><a href="#section-10.2" class="auto internal xref">10.2</a>.  <a href="#name-feedback-amplification" class="internal xref">Feedback Amplification</a></p>
+</li>
+            </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
             <p id="section-toc.1-1.11.1"><a href="#section-11" class="auto internal xref">11</a>. <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
@@ -1301,10 +1312,10 @@ svg {
             </ul>
 </li>
           <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14">
-            <p id="section-toc.1-1.14.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-appendix-b-frame-definition" class="internal xref">Appendix B: Frame Definitions Examples</a></p>
+            <p id="section-toc.1-1.14.1"><a href="#appendix-B" class="auto internal xref"></a><a href="#name-appendix-b-frame-identifica" class="internal xref">Appendix B: Frame Identification Examples</a></p>
 <ul class="compact toc ulBare ulEmpty">
 <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.1">
-                <p id="section-toc.1-1.14.2.1.1"><a href="#appendix-B.1" class="auto internal xref"></a><a href="#name-simple-rtp" class="internal xref">Simple RTP</a></p>
+                <p id="section-toc.1-1.14.2.1.1"><a href="#appendix-B.1" class="auto internal xref"></a><a href="#name-one-frame-per-rtp-timestamp" class="internal xref">One Frame per RTP Timestamp</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.2">
                 <p id="section-toc.1-1.14.2.2.1"><a href="#appendix-B.2" class="auto internal xref"></a><a href="#name-codec-agnostic-identificati" class="internal xref">Codec Agnostic Identification</a></p>
@@ -1327,19 +1338,13 @@ svg {
                     <p id="section-toc.1-1.14.2.3.2.2.1"><a href="#appendix-B.3.2" class="auto internal xref"></a><a href="#name-vp9" class="internal xref">VP9</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3.2.3">
-                    <p id="section-toc.1-1.14.2.3.2.3.1"><a href="#appendix-B.3.3" class="auto internal xref"></a><a href="#name-h264-avc" class="internal xref">H.264/AVC</a></p>
+                    <p id="section-toc.1-1.14.2.3.2.3.1"><a href="#appendix-B.3.3" class="auto internal xref"></a><a href="#name-h264-avc-h265-hevc-and-h266" class="internal xref">H.264/AVC, H.265/HEVC and H.266/VVC</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3.2.4">
-                    <p id="section-toc.1-1.14.2.3.2.4.1"><a href="#appendix-B.3.4" class="auto internal xref"></a><a href="#name-h265-hevc" class="internal xref">H.265/HEVC</a></p>
+                    <p id="section-toc.1-1.14.2.3.2.4.1"><a href="#appendix-B.3.4" class="auto internal xref"></a><a href="#name-av1" class="internal xref">AV1</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3.2.5">
-                    <p id="section-toc.1-1.14.2.3.2.5.1"><a href="#appendix-B.3.5" class="auto internal xref"></a><a href="#name-h266-vvc" class="internal xref">H.266/VVC</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3.2.6">
-                    <p id="section-toc.1-1.14.2.3.2.6.1"><a href="#appendix-B.3.6" class="auto internal xref"></a><a href="#name-av1" class="internal xref">AV1</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.14.2.3.2.7">
-                    <p id="section-toc.1-1.14.2.3.2.7.1"><a href="#appendix-B.3.7" class="auto internal xref"></a><a href="#name-av2" class="internal xref">AV2</a></p>
+                    <p id="section-toc.1-1.14.2.3.2.5.1"><a href="#appendix-B.3.5" class="auto internal xref"></a><a href="#name-av2" class="internal xref">AV2</a></p>
 </li>
                 </ul>
 </li>
@@ -1377,7 +1382,9 @@ svg {
 "<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
 described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
 appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
-<p id="section-2-2">For the purposes of this document, a "frame" is defined as any decodable unit of bitstream data that results in an update to the codec state (e.g. reconstructed reference buffers, entropy tables, etc) that can be used as a reference for any subsequent decodable unit of bitstream data. Typically that will be a full frame, but also include cases such as a "no show" frame intended for later reference or even a part of a frame such as a tile or a slice if it is independently decodable and makes updates to codec state that subsequent objects in the bitstream can later use as reference. The exact definition is intentionally left open in order to allow a codec agnostic signaling protocol, but it is important that the sender and receiver agree on what constitutes a frame.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-2">For the purposes of this document, a "frame" is defined as any independently decodable unit of bitstream data (i.e., decodable on its own, given that any data it references is available) that results in an update to the codec state (e.g., reconstructed reference buffers or entropy coding state) that can be used as a reference by subsequent units of bitstream data. Typically this is a complete frame, or a complete frame of a single layer when spatial scalability is used, but it also includes cases such as a "no show" frame that is only intended for later reference.<a href="#section-2-2" class="pilcrow">¶</a></p>
+<p id="section-2-3">A part of a frame, such as a slice or a tile, is only considered a frame if it is independently decodable, results in its own update to the codec state, and is packetized separately from the rest of the frame, so that it can be identified, and potentially filtered out, at the RTP level. This is generally not the case. Tools such as slices, tiles, or H.265 motion-constrained tile sets allow parts of a picture to be decoded in parallel, but the picture is still decoded, and stored as a reference, as a whole: either the complete picture is decoded or none of it is. In nearly all cases, a frame in the sense of this document is therefore a frame in the conventional sense. See also <span><a href="#mapping_header_extension_to_frames" class="internal xref">Mapping Header Extension to Frames</a> (<a href="#mapping_header_extension_to_frames" class="auto internal xref">Section 8.1</a>)</span>.<a href="#section-2-3" class="pilcrow">¶</a></p>
+<p id="section-2-4">The exact definition is intentionally left open in order to allow a codec agnostic signaling protocol, but it is important that the sender and receiver agree on what constitutes a frame. <span><a href="#frame_identification_examples" class="internal xref">Appendix B</a> (<a href="#frame_identification_examples" class="auto internal xref">Appendix "Appendix B: Frame Identification Examples"</a>)</span> gives examples for some common codecs.<a href="#section-2-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="applicability">
@@ -1454,8 +1461,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-6" class="section-number selfRef">6. </a><a href="#name-frame-acknowledgment-extens" class="section-name selfRef">Frame Acknowledgment Extension</a>
       </h2>
 <p id="section-6-1">The Frame Acknowledgement extension is an RTP header extension used both to identify frames and request feedback about the remote state.
-It <span class="bcp14">MUST</span> appear on the last packet of a video frame, and <span class="bcp14">MUST NOT</span> appear more than once on a single frame.<a href="#section-6-1" class="pilcrow">¶</a></p>
-<div id="frame-identifier">
+Not every frame needs to carry the extension, but when it is used it <span class="bcp14">MUST</span> be attached to the last packet of the frame it identifies (see <span><a href="#mapping_header_extension_to_frames" class="internal xref">Mapping Header Extension to Frames</a> (<a href="#mapping_header_extension_to_frames" class="auto internal xref">Section 8.1</a>)</span>). It <span class="bcp14">MUST NOT</span> appear more than once in a packet, and <span class="bcp14">MUST NOT</span> appear more than once for the same frame.<a href="#section-6-1" class="pilcrow">¶</a></p>
+<div id="frame_identifier">
 <section id="section-6.1">
         <h3 id="name-frame-identifier">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-frame-identifier" class="section-name selfRef">Frame Identifier</a>
@@ -1480,8 +1487,8 @@ The feedback request comprises a Start Frame ID and Length field. Specifying the
         </h3>
 <p id="section-6.3-1">This section describes the data layout for the Frame Acknowledgment RTP Header Extension.
 The extension data starts with the FFR/Reserved byte.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">For a One-Byte Header (as defined in <span>[<a href="#RFC8285" class="cite xref">RFC8285</a>]</span>, Section 4.2), the <code>ID</code> field identifies the extension, and the <code>len</code> field is a 4-bit value <code>N</code> that indicates the number of data bytes following the <code>ID</code> and <code>len</code> fields, <em>minus one</em>. Thus, the total number of bytes for the extension data is <code>N+1</code>.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
-<p id="section-6.3-3">For a Two-Byte Header (as defined in <span>[<a href="#RFC8285" class="cite xref">RFC8285</a>]</span>, Section 4.3), the <code>ID</code> field identifies the extension, and the 8-bit <code>length</code> field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">For a One-Byte Header (as defined in <span>[<a href="#RFC5285" class="cite xref">RFC5285</a>]</span>, Section 4.2), the <code>ID</code> field identifies the extension, and the <code>len</code> field is a 4-bit value <code>N</code> that indicates the number of data bytes following the <code>ID</code> and <code>len</code> fields, <em>minus one</em>. Thus, the total number of bytes for the extension data is <code>N+1</code>.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">For a Two-Byte Header (as defined in <span>[<a href="#RFC5285" class="cite xref">RFC5285</a>]</span>, Section 4.3), the <code>ID</code> field identifies the extension, and the 8-bit <code>length</code> field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.3-4">
 <pre>
  Extension Data:
@@ -1634,7 +1641,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
         <h3 id="name-length-8-bits">
 <a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-length-8-bits" class="section-name selfRef">Length (8 bits)</a>
         </h3>
-<p id="section-7.3-1">An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback information is present, though this <span class="bcp14">SHOULD NOT</span> be sent.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-1">An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback entries are present (e.g., when the requested range has no overlap with the receiver's status window, see <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.5</a>)</span>).<a href="#section-7.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="status-vector-variable-length">
@@ -1664,12 +1671,11 @@ An unsigned integer that indicates the number of consecutive frames the sender i
         <h3 id="name-mapping-header-extension-to">
 <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-mapping-header-extension-to" class="section-name selfRef">Mapping Header Extension to Frames</a>
         </h3>
-<p id="section-8.1-1">As specified by the definition in <span><a href="#conventions_and_definitions" class="internal xref">Conventions and Definitions</a> (<a href="#conventions_and_definitions" class="auto internal xref">Section 2</a>)</span>, a frame is "any decodable unit of bitstream data that results in an update to the codec state that can be used as a reference for any subsequent decodable unit of bitstream data". This has consequences for how to tag the Frame Acknowledgement header extension to an RTP packet.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
-<p id="section-8.1-2">Firstly, the Frame Acknowledgement header extension <span class="bcp14">MUST</span> uniquely identify a single frame.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
-<p id="section-8.1-3">Since we allow only one Frame Acknowledgement header extension per packet, we can identify no more than one frame per packet. Should a packet contain a bundle of multiple frames, the Frame ID in the header extension refers to the last frame in the bundle.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
-<p id="section-8.1-4">Secondly, the Frame ID always refers to the minimum independently decodable unit of data in the packet.
-This means that if, for instance, spatial layers are used, where there are multiple frames per temporal unit, a Frame ID set on the last packet refers only to the last layer frame - not the entire "superframe". It is up to the sender to determine which subset of data it is interested in. If all layers should be individually acknowledged (e.g. when independent, simulcast-style layers are used), then the sender should mark each individual layer frame with a unique Frame ID.<a href="#section-8.1-4" class="pilcrow">¶</a></p>
-<p id="section-8.1-5">Similarly, independently decodable sub-regions within a picture (e.g. H.266/VVC Subpictures or AV2 Extended Layers) may be marked with individual Frame IDs if they are packetized such that each sub-region ends in a separate packet.<a href="#section-8.1-5" class="pilcrow">¶</a></p>
+<p id="section-8.1-1">The definition of a frame in <span><a href="#conventions_and_definitions" class="internal xref">Conventions and Definitions</a> (<a href="#conventions_and_definitions" class="auto internal xref">Section 2</a>)</span> influences which RTP packet the Frame Acknowledgement header extension is attached to, and what a Frame ID refers to.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.1-2">Firstly, a Frame ID <span class="bcp14">MUST</span> uniquely identify a single frame. Since a packet carries at most one Frame Acknowledgement header extension, no more than one frame per packet can be identified. Should a packet contain data from multiple frames, the Frame ID refers to the last frame in that packet.<a href="#section-8.1-2" class="pilcrow">¶</a></p>
+<p id="section-8.1-3">Secondly, a Frame ID refers to the smallest unit of data that constitutes a frame, never to a larger group of frames. For instance, if spatial layers are used, there are multiple frames per time instant, all sharing the same RTP timestamp (called an "access unit" in H.264, H.265 and H.266, a "picture" in <span>[<a href="#RFC9628" class="cite xref">RFC9628</a>]</span>, and a "temporal unit" in AV1). A Frame ID set on the last packet of such a group refers only to the last layer frame, not to the entire group. It is up to the sender to determine which frames it is interested in. If all layers should be individually acknowledged (e.g., when independent, simulcast-style layers are used), then the sender should mark each individual layer frame with a unique Frame ID.<a href="#section-8.1-3" class="pilcrow">¶</a></p>
+<p id="section-8.1-4">Similarly, independently decodable sub-regions of a picture may be marked with individual Frame IDs if they are also packetized such that each sub-region ends in a separate packet, without data from other sub-regions. Examples are independently coded H.266/VVC subpictures, and regions coded as separate AV2 extended layers, see <span><a href="#frame_identification_examples" class="internal xref">Appendix B</a> (<a href="#frame_identification_examples" class="auto internal xref">Appendix "Appendix B: Frame Identification Examples"</a>)</span>. A receiver reports each such frame based on its actual decoding state; e.g., a receiver that is only able to decode complete pictures reports all sub-regions of a partially received picture as not decoded.<a href="#section-8.1-4" class="pilcrow">¶</a></p>
+<p id="section-8.1-5">The receiver must be able to determine which frame the packet carrying the extension belongs to, using the same notion of a frame as the sender. In most cases, this does not impose any new requirements, since a receiver already needs to determine which packets make up a frame in order to decode the video. <span><a href="#frame_identification_examples" class="internal xref">Appendix B</a> (<a href="#frame_identification_examples" class="auto internal xref">Appendix "Appendix B: Frame Identification Examples"</a>)</span> gives examples of how to do this for common codecs and RTP header extensions.<a href="#section-8.1-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="resync-request-handling">
@@ -1677,7 +1683,7 @@ This means that if, for instance, spatial layers are used, where there are multi
         <h3 id="name-resync-request-handling">
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-resync-request-handling" class="section-name selfRef">Resync Request Handling</a>
         </h3>
-<p id="section-8.2-1">When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it <span class="bcp14">MAY</span> send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded Frame ID up to the latest received Frame ID.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-1">When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it <span class="bcp14">MAY</span> send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded Frame ID up to latest received Frame ID.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 <p id="section-8.2-2">Upon receiving a resync request, the sender <span class="bcp14">SHOULD</span>:
 1. Verify that the decoded Frame ID corresponds to a frame that is still available in its reference buffer.
 2. Encode the next frame using the specified frame or another frame with references it knows to be available at the receiver.
@@ -1698,19 +1704,32 @@ This means that if, for instance, spatial layers are used, where there are multi
         <h3 id="name-using-acknowledgement-range">
 <a href="#section-8.4" class="section-number selfRef">8.4. </a><a href="#name-using-acknowledgement-range" class="section-name selfRef">Using acknowledgement ranges</a>
         </h3>
-<p id="section-8.4-1">The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, then only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
+<p id="section-8.4-1">The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.<a href="#section-8.4-1" class="pilcrow">¶</a></p>
 <p id="section-8.4-2">For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
 S1: 100 -&gt; 101 (ID = 1) -&gt; 102 -&gt; 103
 S0: 100 -&gt; 101 -&gt; 102 (ID = 2) -&gt; 103
-Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for. This guarantees that the sender is always able to acquire feedback for all frames it has sent.<a href="#section-8.4-2" class="pilcrow">¶</a></p>
+Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.5</a>)</span> when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.<a href="#section-8.4-2" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="out-of-order-message-handling">
+<div id="receiver_state_limits">
 <section id="section-8.5">
-        <h3 id="name-out-of-order-message-handli">
-<a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
+        <h3 id="name-receiver-state-limits">
+<a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-receiver-state-limits" class="section-name selfRef">Receiver State Limits</a>
         </h3>
-<p id="section-8.5-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
+<p id="section-8.5-1">The receiver maintains a "status window" — a sliding window of contiguous Frame IDs for which it retains decode/receive status. The size of this window (the "status window size") represents the maximum number of consecutive Frame IDs the receiver tracks at any given time. As new Frame IDs are received, the window advances and the oldest entries are discarded.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
+<p id="section-8.5-2">The default status window size is 255 frames. A different status window size <span class="bcp14">MAY</span> be negotiated via SDP (see <span><a href="#status_window_size_signaling" class="internal xref">Status Window Size Signaling</a> (<a href="#status_window_size_signaling" class="auto internal xref">Section 9.4</a>)</span>). A receiver <span class="bcp14">MUST</span> be prepared to maintain a status window of at least the negotiated size, or 255 if no value is negotiated.<a href="#section-8.5-2" class="pilcrow">¶</a></p>
+<p id="section-8.5-3">When a new Frame ID is received that would cause the number of tracked Frame IDs to exceed the status window size, the receiver <span class="bcp14">MUST</span> advance the window by discarding the status of the oldest Frame IDs first (FIFO order), retaining only the most recent entries up to the status window size.<a href="#section-8.5-3" class="pilcrow">¶</a></p>
+<p id="section-8.5-4">If the receiver receives a feedback request whose Feedback Start refers to a Frame ID that has fallen outside its status window (i.e., the state for that Frame ID has been discarded), the receiver <span class="bcp14">MUST</span> respond with a feedback message where the Start Frame ID is set to the oldest Frame ID still within its status window. The Length and status vector cover the intersection of the requested range and the receiver's available state. If there is no overlap between the requested range and the receiver's status window (i.e., the entire requested range has been discarded), the receiver <span class="bcp14">MUST</span> respond with a feedback message with the Start Frame ID set to the Feedback Start from the sender's request and Length set to 0. A sender that receives a feedback response with a Start Frame ID newer than what it requested or a Length of 0 <span class="bcp14">SHOULD</span> interpret this as an indication that the receiver has discarded state for the older frames and <span class="bcp14">MUST NOT</span> use those older frames as references.<a href="#section-8.5-4" class="pilcrow">¶</a></p>
+<p id="section-8.5-5">If the negotiated status window size exceeds 255 frames and the receiver needs to report status for more Frame IDs than a single feedback message can carry (limited by the 8-bit Length field to 255 entries), the receiver <span class="bcp14">MUST</span> split the feedback across multiple RTCP Frame Acknowledgement Feedback messages, each covering a contiguous subset of the requested range.<a href="#section-8.5-5" class="pilcrow">¶</a></p>
+<p id="section-8.5-6">A sender <span class="bcp14">SHOULD</span> issue feedback requests regularly and <span class="bcp14">SHOULD NOT</span> allow the number of unacknowledged Frame IDs to exceed the receiver's status window size. If the sender fails to do so, the receiver will discard state for older frames as described above.<a href="#section-8.5-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="out_of_order_handling">
+<section id="section-8.6">
+        <h3 id="name-out-of-order-message-handli">
+<a href="#section-8.6" class="section-number selfRef">8.6. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
+        </h3>
+<p id="section-8.6-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.6-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1778,6 +1797,28 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <p id="section-9.3-8">The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps use-cases to choose how long receiver need to wait before triggering resync request. Media sender can adjust its interval to request frame acknowledgement feedback if "resync-timeout" based resync feedback is supported by receiver. Media sender can avoid sending frequent frame acknowledgement requests depending on the use-case. Additionally sender could consider RTT during handling of resync feedbacks.<a href="#section-9.3-8" class="pilcrow">¶</a></p>
 </section>
 </div>
+<div id="status_window_size_signaling">
+<section id="section-9.4">
+        <h3 id="name-status-window-size-signalin">
+<a href="#section-9.4" class="section-number selfRef">9.4. </a><a href="#name-status-window-size-signalin" class="section-name selfRef">Status Window Size Signaling</a>
+        </h3>
+<p id="section-9.4-1">A receiver <span class="bcp14">MAY</span> signal the maximum number of frame statuses it is prepared to maintain (its status window size) using the "status-window-size" parameter on the "frame-acknowledgement" rtcp-fb attribute.<a href="#section-9.4-1" class="pilcrow">¶</a></p>
+<p id="section-9.4-2">Syntax:<a href="#section-9.4-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.4-3">
+<pre>
+   a=rtcp-fb:&lt;payload type&gt; frame-acknowledgement;status-window-size=&lt;N&gt;
+</pre><a href="#section-9.4-3" class="pilcrow">¶</a>
+</div>
+<p id="section-9.4-4">The value N is an integer representing the maximum number of unacknowledged frame statuses the receiver will retain at any given time. N <span class="bcp14">MUST</span> be in the range 1 to 32767 inclusive. The upper bound follows from the Frame ID being a 16-bit field that wraps (see <span><a href="#frame_identifier" class="internal xref">Frame Identifier</a> (<a href="#frame_identifier" class="auto internal xref">Section 6.1</a>)</span>): ordering wrapped Frame IDs relies on the same serial-number arithmetic used for RTP sequence numbers (see <span>[<a href="#RFC3550" class="cite xref">RFC3550</a>]</span>, Appendix A.1), which is only unambiguous when the values being compared are less than 2^15 (32768) apart. Values larger than 255 are permitted; in such cases, the receiver <span class="bcp14">MUST</span> split feedback across multiple RTCP messages as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.5</a>)</span>.<a href="#section-9.4-4" class="pilcrow">¶</a></p>
+<p id="section-9.4-5">When used in an offer/answer context, the offerer <span class="bcp14">MAY</span> include a "status-window-size" value to propose a maximum status window size. The answerer <span class="bcp14">MUST</span> respond with a value less than or equal to the offered value. Both the offered and answered values <span class="bcp14">MUST</span> be within the range 1 to 32767 inclusive; a recipient that receives a "status-window-size" value outside this range <span class="bcp14">MUST</span> ignore the parameter and use the default value of 255. If the answerer omits the "status-window-size" parameter entirely, the default value of 255 <span class="bcp14">SHALL</span> be used. The negotiated value (the answerer's value, or 255 if omitted) is the operative status window size for the session; the sender <span class="bcp14">MUST</span> ensure that the number of outstanding (unacknowledged) Frame IDs does not exceed this value.<a href="#section-9.4-5" class="pilcrow">¶</a></p>
+<p id="section-9.4-6">If multiple parameters are present, they are separated by semicolons:<a href="#section-9.4-6" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-9.4-7">
+<pre>
+   a=rtcp-fb:96 frame-acknowledgement;resync-timeout=500;status-window-size=64
+</pre><a href="#section-9.4-7" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
 </section>
 </div>
 <div id="security-considerations">
@@ -1787,6 +1828,24 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
       </h2>
 <p id="section-10-1">The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially in an indirect way which frames the sender sees as important for recovery.<a href="#section-10-1" class="pilcrow">¶</a></p>
 <p id="section-10-2">This data should however not pose any significant privacy or security risks.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<div id="state-exhaustion">
+<section id="section-10.1">
+        <h3 id="name-state-exhaustion">
+<a href="#section-10.1" class="section-number selfRef">10.1. </a><a href="#name-state-exhaustion" class="section-name selfRef">State Exhaustion</a>
+        </h3>
+<p id="section-10.1-1">A misbehaving sender could attempt to exhaust receiver memory by continuously assigning Frame IDs without ever issuing feedback requests, causing the receiver to accumulate frame state indefinitely. Receivers <span class="bcp14">MUST</span> implement a status window as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.5</a>)</span> and discard state for older frames when this window is exceeded. The maximum state a compliant receiver will maintain is bounded by its status window size, which limits memory consumption to a small, predictable amount regardless of sender behavior.<a href="#section-10.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="feedback-amplification">
+<section id="section-10.2">
+        <h3 id="name-feedback-amplification">
+<a href="#section-10.2" class="section-number selfRef">10.2. </a><a href="#name-feedback-amplification" class="section-name selfRef">Feedback Amplification</a>
+        </h3>
+<p id="section-10.2-1">A sender could potentially request feedback repeatedly for the same set of Frame IDs, causing the receiver to generate RTCP feedback traffic. This concern is mitigated by the RTCP feedback timing rules defined in <span>[<a href="#RFC4585" class="cite xref">RFC4585</a>]</span> (Sections 3.3 and 3.5), which govern when and how often immediate and early feedback can be transmitted. Receivers <span class="bcp14">MUST</span> comply with these timing rules regardless of how frequently feedback is requested.<a href="#section-10.2-1" class="pilcrow">¶</a></p>
+<p id="section-10.2-2">When a receiver defers transmission of a feedback message to comply with these timing rules (or due to bandwidth constraints), its status window continues to advance as new Frame IDs are received in the interim. The receiver <span class="bcp14">MUST</span> generate the contents of a deferred feedback message based on the state of its status window at the time the message is sent, not at the time the request was received. Consequently, frames that have fallen outside the status window between request and transmission are reported using the shifted Start Frame ID, reduced range, or Length=0 rules defined in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.5</a>)</span>. For example, if a request for Frame IDs 1 through 4 cannot be answered until the status window has advanced to 3 through 6, the receiver responds with feedback covering only Frame IDs 3 and 4.<a href="#section-10.2-2" class="pilcrow">¶</a></p>
+<p id="section-10.2-3">If a receiver receives a new feedback request before it has transmitted a response to an earlier, still-pending request, the receiver <span class="bcp14">SHOULD</span> drop the older request and respond only to the most recent one. This complements the supersession rule in <span><a href="#out_of_order_handling" class="internal xref">Out-of-order Message Handling</a> (<a href="#out_of_order_handling" class="auto internal xref">Section 8.6</a>)</span>, and ensures that a sender requesting feedback faster than the timing rules permit responses does not cause a backlog of feedback messages to accumulate at the receiver.<a href="#section-10.2-3" class="pilcrow">¶</a></p>
+</section>
+</div>
 </section>
 </div>
 <div id="iana-considerations">
@@ -1834,25 +1893,52 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <a href="#section-12.2" class="section-number selfRef">12.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
         </h3>
 <dl class="references">
+<dt id="AV1-RTP">[AV1-RTP]</dt>
+        <dd>
+<span class="refAuthor">AOM</span>, <span class="refTitle">"RTP Payload Format For AV1"</span>, <time datetime="2024-12-15" class="refDate">15 December 2024</time>, <span>&lt;<a href="https://aomediacodec.github.io/av1-rtp-spec/v1.0.0.html">https://aomediacodec.github.io/av1-rtp-spec/v1.0.0.html</a>&gt;</span>. <span class="annotation">Version 1.0.0</span>
+        </dd>
+<dd class="break"></dd>
 <dt id="AV1-Spec">[AV1-Spec]</dt>
         <dd>
-<span class="refAuthor">AOM</span>, <span class="refTitle">"AV1 Bitstream &amp; Decoding Process Specification"</span>, <span>n.d.</span>, <span>&lt;<a href="https://aomediacodec.github.io/av1-spec/av1-spec.pdf">https://aomediacodec.github.io/av1-spec/av1-spec.pdf</a>&gt;</span>. </dd>
+<span class="refAuthor">AOM</span>, <span class="refTitle">"AV1 Bitstream &amp; Decoding Process Specification"</span>, <time datetime="2019-01-08" class="refDate">8 January 2019</time>, <span>&lt;<a href="https://aomediacodec.github.io/av1-spec/av1-spec.pdf">https://aomediacodec.github.io/av1-spec/av1-spec.pdf</a>&gt;</span>. <span class="annotation">Version 1.0.0 with Errata 1</span>
+        </dd>
 <dd class="break"></dd>
 <dt id="AV2-Spec">[AV2-Spec]</dt>
         <dd>
-<span class="refAuthor">AOM</span>, <span class="refTitle">"AV2 Bitstream &amp; Decoding Process Specification"</span>, <span>n.d.</span>, <span>&lt;<a href="https://av2.aomedia.org/v13-public/index.html">https://av2.aomedia.org/v13-public/index.html</a>&gt;</span>. </dd>
+<span class="refAuthor">AOM</span>, <span class="refTitle">"AV2 Bitstream &amp; Decoding Process Specification"</span>, <time datetime="2026-05-28" class="refDate">28 May 2026</time>, <span>&lt;<a href="https://av2.aomedia.org/v1.0.0/index.html">https://av2.aomedia.org/v1.0.0/index.html</a>&gt;</span>. <span class="annotation">Version 1.0.0</span>
+        </dd>
 <dd class="break"></dd>
 <dt id="DD">[DD]</dt>
         <dd>
 <span class="refAuthor">AOM</span>, <span class="refTitle">"Dependency Descriptor RTP Header Extension"</span>, <span>n.d.</span>, <span>&lt;<a href="https://aomediacodec.github.io/av1-rtp-spec/#dependency-descriptor-rtp-header-extension">https://aomediacodec.github.io/av1-rtp-spec/#dependency-descriptor-rtp-header-extension</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="H264">[H264]</dt>
+        <dd>
+<span class="refAuthor">ITU-T</span>, <span class="refTitle">"Advanced video coding for generic audiovisual services"</span>, <span class="seriesInfo">ITU-T Recommendation H.264</span>, <time datetime="2026-06" class="refDate">June 2026</time>, <span>&lt;<a href="https://www.itu.int/rec/T-REC-H.264">https://www.itu.int/rec/T-REC-H.264</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="H265">[H265]</dt>
+        <dd>
+<span class="refAuthor">ITU-T</span>, <span class="refTitle">"High efficiency video coding"</span>, <span class="seriesInfo">ITU-T Recommendation H.265</span>, <time datetime="2026-01" class="refDate">January 2026</time>, <span>&lt;<a href="https://www.itu.int/rec/T-REC-H.265">https://www.itu.int/rec/T-REC-H.265</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="H266">[H266]</dt>
+        <dd>
+<span class="refAuthor">ITU-T</span>, <span class="refTitle">"Versatile video coding"</span>, <span class="seriesInfo">ITU-T Recommendation H.266</span>, <time datetime="2026-01" class="refDate">January 2026</time>, <span>&lt;<a href="https://www.itu.int/rec/T-REC-H.266">https://www.itu.int/rec/T-REC-H.266</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="LNTF">[LNTF]</dt>
         <dd>
 <span class="refTitle">"RTCP feedback Message for Loss Notification"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-majali-avtcore-lntf-feedback-message-00.html">https://www.ietf.org/archive/id/draft-majali-avtcore-lntf-feedback-message-00.html</a>&gt;</span>. </dd>
 <dd class="break"></dd>
+<dt id="RFC3550">[RFC3550]</dt>
+        <dd>
+<span class="refAuthor">Schulzrinne, H.</span>, <span class="refAuthor">Casner, S.</span>, <span class="refAuthor">Frederick, R.</span>, and <span class="refAuthor">V. Jacobson</span>, <span class="refTitle">"RTP: A Transport Protocol for Real-Time Applications"</span>, <span class="seriesInfo">STD 64</span>, <span class="seriesInfo">RFC 3550</span>, <span class="seriesInfo">DOI 10.17487/RFC3550</span>, <time datetime="2003-07" class="refDate">July 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3550">https://www.rfc-editor.org/rfc/rfc3550</a>&gt;</span>. </dd>
+<dd class="break"></dd>
 <dt id="RFC4585">[RFC4585]</dt>
         <dd>
 <span class="refAuthor">Ott, J.</span>, <span class="refAuthor">Wenger, S.</span>, <span class="refAuthor">Sato, N.</span>, <span class="refAuthor">Burmeister, C.</span>, and <span class="refAuthor">J. Rey</span>, <span class="refTitle">"Extended RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/AVPF)"</span>, <span class="seriesInfo">RFC 4585</span>, <span class="seriesInfo">DOI 10.17487/RFC4585</span>, <time datetime="2006-07" class="refDate">July 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4585">https://www.rfc-editor.org/rfc/rfc4585</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC5285">[RFC5285]</dt>
+        <dd>
+<span class="refAuthor">Singer, D.</span> and <span class="refAuthor">H. Desineni</span>, <span class="refTitle">"A General Mechanism for RTP Header Extensions"</span>, <span class="seriesInfo">RFC 5285</span>, <span class="seriesInfo">DOI 10.17487/RFC5285</span>, <time datetime="2008-07" class="refDate">July 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5285">https://www.rfc-editor.org/rfc/rfc5285</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC6184">[RFC6184]</dt>
         <dd>
@@ -1861,6 +1947,10 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <dt id="RFC6190">[RFC6190]</dt>
         <dd>
 <span class="refAuthor">Wenger, S.</span>, <span class="refAuthor">Wang, Y.-K.</span>, <span class="refAuthor">Schierl, T.</span>, and <span class="refAuthor">A. Eleftheriadis</span>, <span class="refTitle">"RTP Payload Format for Scalable Video Coding"</span>, <span class="seriesInfo">RFC 6190</span>, <span class="seriesInfo">DOI 10.17487/RFC6190</span>, <time datetime="2011-05" class="refDate">May 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6190">https://www.rfc-editor.org/rfc/rfc6190</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6386">[RFC6386]</dt>
+        <dd>
+<span class="refAuthor">Bankoski, J.</span>, <span class="refAuthor">Koleszar, J.</span>, <span class="refAuthor">Quillio, L.</span>, <span class="refAuthor">Salonen, J.</span>, <span class="refAuthor">Wilkins, P.</span>, and <span class="refAuthor">Y. Xu</span>, <span class="refTitle">"VP8 Data Format and Decoding Guide"</span>, <span class="seriesInfo">RFC 6386</span>, <span class="seriesInfo">DOI 10.17487/RFC6386</span>, <time datetime="2011-11" class="refDate">November 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6386">https://www.rfc-editor.org/rfc/rfc6386</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7667">[RFC7667]</dt>
         <dd>
@@ -1903,8 +1993,13 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <span class="refTitle">"RTP Extensions for Transport-wide Congestion Control"</span>, <span>n.d.</span>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01">https://datatracker.ietf.org/doc/html/draft-holmer-rmcat-transport-wide-cc-extensions-01</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="VFTI">[VFTI]</dt>
-      <dd>
+        <dd>
 <span class="refTitle">"Video Frame Tracking Id"</span>, <span>n.d.</span>, <span>&lt;<a href="http://www.webrtc.org/experiments/rtp-hdrext/video-frame-tracking-id">http://www.webrtc.org/experiments/rtp-hdrext/video-frame-tracking-id</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="VP9">[VP9]</dt>
+      <dd>
+<span class="refAuthor">Grange, A.</span>, <span class="refAuthor">de Rivaz, P.</span>, and <span class="refAuthor">J. Hunt</span>, <span class="refTitle">"VP9 Bitstream &amp; Decoding Process Specification"</span>, <time datetime="2016-03-31" class="refDate">31 March 2016</time>, <span>&lt;<a href="https://storage.googleapis.com/downloads.webmproject.org/docs/vp9/vp9-bitstream-specification-v0.6-20160331-draft.pdf">https://storage.googleapis.com/downloads.webmproject.org/docs/vp9/vp9-bitstream-specification-v0.6-20160331-draft.pdf</a>&gt;</span>. <span class="annotation">Version 0.6</span>
+        </dd>
 <dd class="break"></dd>
 </dl>
 </section>
@@ -2114,19 +2209,19 @@ Media Sender                              Media Receiver
 </div>
 </section>
 </div>
-<div id="appendix-b-frame-definitions-examples">
+<div id="frame_identification_examples">
 <section id="appendix-B">
-      <h2 id="name-appendix-b-frame-definition">
-<a href="#name-appendix-b-frame-definition" class="section-name selfRef">Appendix B: Frame Definitions Examples</a>
+      <h2 id="name-appendix-b-frame-identifica">
+<a href="#name-appendix-b-frame-identifica" class="section-name selfRef">Appendix B: Frame Identification Examples</a>
       </h2>
-<p id="appendix-B-1">The encoder at the sending side will naturally know what constitutes a "frame" that it wants feedback about, but it is vital that the same definition is used at the receiving end, so that it can send feedback for the same objects.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
-<p id="appendix-B-2">This appendix shows some concrete examples of how to identify a "frame" in accordance with this document, for some commonly available codec types. See also <span><a href="#mapping_header_extension_to_frames" class="internal xref">Mapping Header Extension to Frames</a> (<a href="#mapping_header_extension_to_frames" class="auto internal xref">Section 8.1</a>)</span>.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
-<div id="simple-rtp">
+<p id="appendix-B-1">The sender naturally knows what constitutes a frame that it wants feedback about, but it is vital that the receiver uses the same definition, so that the feedback refers to the same units of bitstream data.<a href="#appendix-B-1" class="pilcrow">¶</a></p>
+<p id="appendix-B-2">This appendix gives concrete examples of how to identify the frame that a Frame Acknowledgement header extension refers to, for some common codecs and RTP header extensions. For details, see the referenced codec specifications and RTP payload formats. See also <span><a href="#mapping_header_extension_to_frames" class="internal xref">Mapping Header Extension to Frames</a> (<a href="#mapping_header_extension_to_frames" class="auto internal xref">Section 8.1</a>)</span>.<a href="#appendix-B-2" class="pilcrow">¶</a></p>
+<div id="one-frame-per-rtp-timestamp">
 <section id="appendix-B.1">
-        <h3 id="name-simple-rtp">
-<a href="#name-simple-rtp" class="section-name selfRef">Simple RTP</a>
+        <h3 id="name-one-frame-per-rtp-timestamp">
+<a href="#name-one-frame-per-rtp-timestamp" class="section-name selfRef">One Frame per RTP Timestamp</a>
         </h3>
-<p id="appendix-B.1-1">In the simplest of cases, with no scalability or other advanced reference structure, no padding packets, nothing fancy at all - one can simply look at the marker bit of the RTP header. If it is set, it indicates the end of a frame and is thus eligible to receive a Frame ID. The caveat being that there is very unclear need for frame acknowledgement in this use case.<a href="#appendix-B.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.1-1">In the simplest case, each RTP timestamp corresponds to exactly one frame, i.e., there is no spatial scalability, and no frames (such as "no show" frames) share an RTP timestamp with another frame. The RTP timestamp of the packet carrying the extension then identifies the frame. With the RTP payload formats referenced below, that packet is also the one with the RTP marker bit set, although the receiver does not need to rely on the marker bit. Frame acknowledgement is also useful in this case, e.g., to recover from loss in a simple IPPP structure by encoding a frame that only references an acknowledged frame.<a href="#appendix-B.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="codec-agnostic-identification">
@@ -2134,13 +2229,13 @@ Media Sender                              Media Receiver
         <h3 id="name-codec-agnostic-identificati">
 <a href="#name-codec-agnostic-identificati" class="section-name selfRef">Codec Agnostic Identification</a>
         </h3>
-<p id="appendix-B.2-1">In some applications, metadata provided via RTP header extensions can be used to reason about the frames contained in the packets, without actually having to parse the RTP payload data. This greatly simplifies inferring which "frame" the extension is attached to.<a href="#appendix-B.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.2-1">RTP header extensions that describe the frames carried in a packet can be used to determine which frame the Frame Acknowledgement header extension is attached to, without having to parse the RTP payload. This also works when the payload is encrypted end-to-end.<a href="#appendix-B.2-1" class="pilcrow">¶</a></p>
 <div id="video-frame-marking-rtp-header-extension">
 <section id="appendix-B.2.1">
           <h4 id="name-video-frame-marking-rtp-hea">
 <a href="#name-video-frame-marking-rtp-hea" class="section-name selfRef">Video Frame Marking RTP Header Extension</a>
           </h4>
-<p id="appendix-B.2.1-1">If the Video Frame Marking extension <span>[<a href="#RFC9626" class="cite xref">RFC9626</a>]</span> is used to signal frame dependencies, packets with the 'E' bit set indicate the end of a frame, and are candidates for being assigned a Frame ID.<a href="#appendix-B.2.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.2.1-1">The Video Frame Marking extension <span>[<a href="#RFC9626" class="cite xref">RFC9626</a>]</span> defines a "frame within a layer" as the set of packets with the same RTP timestamp, SSRC, TID and LID. With the long form of the extension, the E (End of Frame) bit is set on the last packet of each frame within a layer, and that packet is the one that carries the Frame Acknowledgement header extension. With the short form, the E bit only marks the last packet of all packets with the same RTP timestamp, which is only sufficient if there is one frame per RTP timestamp.<a href="#appendix-B.2.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="dependency-descriptor-rtp-header-extension">
@@ -2148,7 +2243,7 @@ Media Sender                              Media Receiver
           <h4 id="name-dependency-descriptor-rtp-h">
 <a href="#name-dependency-descriptor-rtp-h" class="section-name selfRef">Dependency Descriptor RTP Header Extension</a>
           </h4>
-<p id="appendix-B.2.2-1">If the Dependency Descriptor extension <span>[<a href="#DD" class="cite xref">DD</a>]</span> is used to signal frame dependencies, packets with the 'end_of_frame' bit set are candidates for being assigned a Frame ID.<a href="#appendix-B.2.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.2.2-1">The Dependency Descriptor <span>[<a href="#DD" class="cite xref">DD</a>]</span> describes dependencies between "RTP frames", where each RTP frame contains exactly one coded frame. The end_of_frame flag is set on the last packet of an RTP frame, and that packet is the one that carries the Frame Acknowledgement header extension. The frame is identified by the frame_number field. Note that frame_number is independent of the Frame ID, which is only assigned to frames that the sender wants feedback for.<a href="#appendix-B.2.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -2158,17 +2253,15 @@ Media Sender                              Media Receiver
         <h3 id="name-codec-specific-identificati">
 <a href="#name-codec-specific-identificati" class="section-name selfRef">Codec Specific Identification</a>
         </h3>
-<p id="appendix-B.3-1">If no codec agnostic header metadata is available, a codec specific payload header likely needs to be parsed instead.<a href="#appendix-B.3-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.3-1">If no such header extension is available, the receiver needs to parse the codec specific RTP payload headers, and in some cases the payload data itself, to determine which frame a packet belongs to.<a href="#appendix-B.3-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.3-2">Unless noted otherwise below, partitions of a frame such as slices, tiles or tile groups are not frames in the sense of this document: they may be decodable in parallel, but the frame is decoded, and the codec state updated, as a whole.<a href="#appendix-B.3-2" class="pilcrow">¶</a></p>
 <div id="vp8">
 <section id="appendix-B.3.1">
           <h4 id="name-vp8">
 <a href="#name-vp8" class="section-name selfRef">VP8</a>
           </h4>
-<ul class="normal">
-<li class="normal" id="appendix-B.3.1-1.1">
-              <p id="appendix-B.3.1-1.1.1"><strong>Layer Frame (Picture):</strong> A VP8 picture is packetized with a VP8 payload descriptor <span>[<a href="#RFC7741" class="cite xref">RFC7741</a>]</span> across one or more RTP packets. The end of a layer frame is indicated by the RTP marker bit (M) being set to 1.<a href="#appendix-B.3.1-1.1.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+<p id="appendix-B.3.1-1">VP8 is specified in <span>[<a href="#RFC6386" class="cite xref">RFC6386</a>]</span>, and its RTP payload format in <span>[<a href="#RFC7741" class="cite xref">RFC7741</a>]</span>. VP8 has no spatial scalability within a stream, so each encoded VP8 frame, including frames that are not shown, is a frame in the sense of this document. The RTP marker bit is set on the last packet of each encoded frame (<span><a href="https://rfc-editor.org/rfc/rfc7741#section-4.1" class="relref">Section 4.1</a> of [<a href="#RFC7741" class="cite xref">RFC7741</a>]</span>), and that packet is the one that carries the Frame Acknowledgement header extension.<a href="#appendix-B.3.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.1-2">A VP8 frame is divided into partitions, where the first partition contains the prediction modes and motion vectors for all macroblocks, and the remaining partitions contain the residual coefficients (<span><a href="https://rfc-editor.org/rfc/rfc6386#section-4" class="relref">Section 4</a> of [<a href="#RFC6386" class="cite xref">RFC6386</a>]</span>). A partition cannot be decoded into a correct reconstruction on its own, and VP8 has no tiles or slices.<a href="#appendix-B.3.1-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="vp9">
@@ -2176,107 +2269,43 @@ Media Sender                              Media Receiver
           <h4 id="name-vp9">
 <a href="#name-vp9" class="section-name selfRef">VP9</a>
           </h4>
-<p id="appendix-B.3.2-1">The RTP payload format for VP9 is defined in <span>[<a href="#RFC9628" class="cite xref">RFC9628</a>]</span>.<a href="#appendix-B.3.2-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="appendix-B.3.2-2.1">
-              <p id="appendix-B.3.2-2.1.1"><strong>Superframe (Access Unit):</strong> A VP9 superframe (or temporal unit) contains one or more layer frames (spatial or temporal layers) at the same time instant. The end of a superframe is the last packet of the highest active layer frame in the superframe, indicated by the RTP marker bit (M) set to 1.<a href="#appendix-B.3.2-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.2-2.2">
-              <p id="appendix-B.3.2-2.2.1"><strong>Layer Frame (Picture):</strong> A VP9 picture is packetized in one or more RTP packets. The end of a layer frame is identified by the <code>e</code> (end-of-frame) bit set to 1 in the VP9 payload descriptor.<a href="#appendix-B.3.2-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+<p id="appendix-B.3.2-1">VP9 is specified in <span>[<a href="#VP9" class="cite xref">VP9</a>]</span>, and its RTP payload format in <span>[<a href="#RFC9628" class="cite xref">RFC9628</a>]</span>. In <span>[<a href="#RFC9628" class="cite xref">RFC9628</a>]</span>, a "frame" is a single encoded VP9 frame of one spatial layer, and a "picture" consists of all frames of the different spatial layers for one time instant. Each VP9 frame is a frame in the sense of this document, except a frame with show_existing_frame set to 1, which only outputs a previously decoded frame and does not update the codec state. Note that a frame that is not shown may share its RTP timestamp with the subsequent shown frame, but has a different picture ID (see Sections 4.1 and 4.2 of <span>[<a href="#RFC9628" class="cite xref">RFC9628</a>]</span>).<a href="#appendix-B.3.2-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.2-2">The E (End of Frame) bit of the VP9 payload descriptor is set on the last packet of each frame (<span><a href="https://rfc-editor.org/rfc/rfc9628#section-4.2" class="relref">Section 4.2</a> of [<a href="#RFC9628" class="cite xref">RFC9628</a>]</span>), and that packet is the one that carries the Frame Acknowledgement header extension. When spatial scalability is used, the spatial layer of the frame is given by the SID field of the payload descriptor, and the RTP marker bit only marks the last packet of the picture, i.e., of the frame of the highest spatial layer.<a href="#appendix-B.3.2-2" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.2-3">VP9 tiles are not frames in the sense of this document: tile rows depend on each other, and probability adaptation, loop filtering and the reference buffer update are performed for the frame as a whole. Note also that a VP9 "superframe" (Annex B of <span>[<a href="#VP9" class="cite xref">VP9</a>]</span>) is a bitstream container for one or more frames, and is not the same as a picture.<a href="#appendix-B.3.2-3" class="pilcrow">¶</a></p>
 </section>
 </div>
-<div id="h264avc">
+<div id="h264avc-h265hevc-and-h266vvc">
 <section id="appendix-B.3.3">
-          <h4 id="name-h264-avc">
-<a href="#name-h264-avc" class="section-name selfRef">H.264/AVC</a>
+          <h4 id="name-h264-avc-h265-hevc-and-h266">
+<a href="#name-h264-avc-h265-hevc-and-h266" class="section-name selfRef">H.264/AVC, H.265/HEVC and H.266/VVC</a>
           </h4>
-<p id="appendix-B.3.3-1">The RTP payload formats for H.264/AVC and H.264/SVC are defined in <span>[<a href="#RFC6184" class="cite xref">RFC6184</a>]</span> and <span>[<a href="#RFC6190" class="cite xref">RFC6190</a>]</span>, respectively.<a href="#appendix-B.3.3-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="appendix-B.3.3-2.1">
-              <p id="appendix-B.3.3-2.1.1"><strong>Superframe (Access Unit):</strong> For scalable streams (H.264/SVC), an Access Unit contains pictures from multiple layers. The end of the Access Unit (superframe) is the last packet of the highest active layer picture in the Access Unit. The RTP marker bit (M) <span class="bcp14">MUST</span> be set to 1 on the last packet of this highest layer picture. For non-scalable H.264/AVC, the Access Unit consists of a single picture, and its end corresponds to the end of that picture (with M=1).<a href="#appendix-B.3.3-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.3-2.2">
-              <p id="appendix-B.3.3-2.2.1"><strong>Layer Frame (Picture):</strong> A picture is composed of one or more slices. In the base H.264/AVC version, the end of a picture/layer frame can be inferred when the last slice of the picture is received (indicated by the RTP marker bit (M) or the E bit of a Fragmentation Unit). In the scalable (SVC) version, the end of a layer frame is identified by observing the transition of <code>dependency_id</code> or <code>quality_id</code> in the payload header.<a href="#appendix-B.3.3-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-</section>
-</div>
-<div id="h265hevc">
-<section id="appendix-B.3.4">
-          <h4 id="name-h265-hevc">
-<a href="#name-h265-hevc" class="section-name selfRef">H.265/HEVC</a>
-          </h4>
-<p id="appendix-B.3.4-1">The RTP payload format for H.265/HEVC is defined in <span>[<a href="#RFC7798" class="cite xref">RFC7798</a>]</span>.<a href="#appendix-B.3.4-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="appendix-B.3.4-2.1">
-              <p id="appendix-B.3.4-2.1.1"><strong>Superframe (Access Unit):</strong> For scalable streams (SHVC), an Access Unit contains pictures from multiple layers at the same time instant. The end of the Access Unit (superframe) is the last packet of the highest active layer picture in the Access Unit. The RTP marker bit (M) <span class="bcp14">MUST</span> be set to 1 on the last packet of this highest layer picture, indicating the end of the entire Access Unit.<a href="#appendix-B.3.4-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.4-2.2">
-              <p id="appendix-B.3.4-2.2.1"><strong>Layer Frame (Picture):</strong> A single picture within a layer is comprised of VCL NAL units. The end of a picture/layer frame can be identified when the last VCL NAL unit of that picture is received. Slices belonging to the same picture share the same Picture Order Count (POC) and layer identifier (<code>nuh_layer_id</code>).<a href="#appendix-B.3.4-2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.4-2.3">
-              <p id="appendix-B.3.4-2.3.1"><strong>Tile/Subpicture:</strong> H.265 supports Motion Constrained Tile Sets (MCTS). If independent tiles (MCTS) are packetized as separate slices (or slice segments), the end of a tile/sub-region corresponds to the end of the NAL unit containing the last slice segment of that tile.<a href="#appendix-B.3.4-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-</section>
-</div>
-<div id="h266vvc">
-<section id="appendix-B.3.5">
-          <h4 id="name-h266-vvc">
-<a href="#name-h266-vvc" class="section-name selfRef">H.266/VVC</a>
-          </h4>
-<p id="appendix-B.3.5-1">The RTP payload format for H.266/VVC is defined in <span>[<a href="#RFC9328" class="cite xref">RFC9328</a>]</span>.<a href="#appendix-B.3.5-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="appendix-B.3.5-2.1">
-              <p id="appendix-B.3.5-2.1.1"><strong>Superframe (Access Unit):</strong> In a multilayer VVC bitstream, an Access Unit contains pictures for all layers at a given time instant. The end of the Access Unit (superframe) is the last packet of the highest active layer picture. The RTP marker bit (M) <span class="bcp14">MUST</span> be set to 1 on this last packet.<a href="#appendix-B.3.5-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.5-2.2">
-              <p id="appendix-B.3.5-2.2.1"><strong>Layer Frame (Picture):</strong> A picture consists of one or more VCL NAL units. The end of a picture/layer frame is the last VCL NAL unit of the picture, which can be identified by the end of the last slice of the picture. All slices in a picture share the same POC and <code>nuh_layer_id</code>.<a href="#appendix-B.3.5-2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.5-2.3">
-              <p id="appendix-B.3.5-2.3.1"><strong>Tile/Subpicture:</strong> VVC natively supports Subpictures, which are independently decodable rectangular regions. A subpicture consists of one or more slices. If a subpicture is packetized independently, the end of the subpicture corresponds to the end of the NAL unit containing the last slice of that subpicture.<a href="#appendix-B.3.5-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+<p id="appendix-B.3.3-1">H.264/AVC <span>[<a href="#H264" class="cite xref">H264</a>]</span>, H.265/HEVC <span>[<a href="#H265" class="cite xref">H265</a>]</span> and H.266/VVC <span>[<a href="#H266" class="cite xref">H266</a>]</span> share the same basic structure, and so do their RTP payload formats: <span>[<a href="#RFC6184" class="cite xref">RFC6184</a>]</span> (and <span>[<a href="#RFC6190" class="cite xref">RFC6190</a>]</span> for the scalable extension of H.264), <span>[<a href="#RFC7798" class="cite xref">RFC7798</a>]</span> and <span>[<a href="#RFC9328" class="cite xref">RFC9328</a>]</span>, respectively. A coded picture is carried in one or more VCL NAL units, and the NAL units associated with one time instant form an access unit. The RTP marker bit is set on the last packet of an access unit (<span><a href="https://rfc-editor.org/rfc/rfc6184#section-5.1" class="relref">Section 5.1</a> of [<a href="#RFC6184" class="cite xref">RFC6184</a>]</span>, <span><a href="https://rfc-editor.org/rfc/rfc7798#section-4.1" class="relref">Section 4.1</a> of [<a href="#RFC7798" class="cite xref">RFC7798</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc9328#section-4.1" class="relref">Section 4.1</a> of [<a href="#RFC9328" class="cite xref">RFC9328</a>]</span>).<a href="#appendix-B.3.3-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.3-2">Without scalability, an access unit contains a single coded picture, which is the frame in the sense of this document, and the last packet of the access unit is the one that carries the Frame Acknowledgement header extension. Note that <span>[<a href="#RFC6184" class="cite xref">RFC6184</a>]</span> does not allow decoders to rely on the marker bit, but the frame is identified by the RTP timestamp in this case.<a href="#appendix-B.3.3-2" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.3-3">With multiple layers, the coded picture of each layer is a separate frame. In H.265 and H.266, the layer of a NAL unit is given by nuh_layer_id, which is carried in the LayerId field of the payload header (<span><a href="https://rfc-editor.org/rfc/rfc7798#section-1.1.4" class="relref">Section 1.1.4</a> of [<a href="#RFC7798" class="cite xref">RFC7798</a>]</span> and <span><a href="https://rfc-editor.org/rfc/rfc9328#section-1.1.4" class="relref">Section 1.1.4</a> of [<a href="#RFC9328" class="cite xref">RFC9328</a>]</span>). Note that <span>[<a href="#RFC7798" class="cite xref">RFC7798</a>]</span> does not specify the transport of multiple layers, whereas <span>[<a href="#RFC9328" class="cite xref">RFC9328</a>]</span> carries all layers in a single RTP stream. In the scalable extension of H.264 (Annex F of <span>[<a href="#H264" class="cite xref">H264</a>]</span>), a frame corresponds to a layer representation, i.e., the VCL NAL units of an access unit with the same dependency_id and quality_id. The dependency_id and quality_id values are carried in the NAL unit header extension of prefix NAL units and coded slice extension NAL units (<span><a href="https://rfc-editor.org/rfc/rfc6190#section-1.1.3" class="relref">Section 1.1.3</a> of [<a href="#RFC6190" class="cite xref">RFC6190</a>]</span>). In aggregation packets, the E bit of the PACSI NAL unit can also indicate the end of a layer representation (<span><a href="https://rfc-editor.org/rfc/rfc6190#section-4.9" class="relref">Section 4.9</a> of [<a href="#RFC6190" class="cite xref">RFC6190</a>]</span>).<a href="#appendix-B.3.3-3" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.3-4">Slices, and in H.265 and H.266 also tiles, are partitions of a picture. They can be parsed, and largely reconstructed, independently of each other, but the decoding process requires all slices of a picture, and the decoded picture is only marked as a reference picture once all slices have been decoded (e.g., clause 8.1.3 of <span>[<a href="#H265" class="cite xref">H265</a>]</span> and clause 8.1.2 of <span>[<a href="#H266" class="cite xref">H266</a>]</span>). This also applies to H.264 slice groups constrained by a motion-constrained slice group set SEI message (clause D.2.20 of <span>[<a href="#H264" class="cite xref">H264</a>]</span>), and to H.265 motion-constrained tile sets (MCTS, clause D.3.30 of <span>[<a href="#H265" class="cite xref">H265</a>]</span>). These are coded such that they can be decoded independently of the rest of the picture, but <span>[<a href="#RFC6184" class="cite xref">RFC6184</a>]</span> and <span>[<a href="#RFC7798" class="cite xref">RFC7798</a>]</span> provide no means of handling them separately, and decoding an MCTS on its own requires extracting it into a new bitstream (clause D.3.43 of <span>[<a href="#H265" class="cite xref">H265</a>]</span>). Within the original stream, the picture is therefore the frame.<a href="#appendix-B.3.3-4" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.3-5">H.266 subpictures (clause 3.146 of <span>[<a href="#H266" class="cite xref">H266</a>]</span>) are different in that their independence is normative: a subpicture that is treated as a picture (sps_subpic_treated_as_pic_flag equal to 1), and across whose boundaries no in-loop filtering is applied, is decoded independently of other subpictures. Different subpictures of a picture may use different NAL unit types, allowing a single subpicture to be refreshed, and subpictures can be extracted into a conforming bitstream by only rewriting parameter sets (clause C.7 of <span>[<a href="#H266" class="cite xref">H266</a>]</span>). <span>[<a href="#RFC9328" class="cite xref">RFC9328</a>]</span> anticipates systems that remove subpictures, and notes that senders should then only aggregate NAL units belonging to the same subpicture (<span><a href="https://rfc-editor.org/rfc/rfc9328#section-4.3.2" class="relref">Section 4.3.2</a> of [<a href="#RFC9328" class="cite xref">RFC9328</a>]</span>). Such independently coded and separately packetized subpictures may therefore be marked as individual frames. The subpicture that a slice belongs to is given by sh_subpic_id in the slice header.<a href="#appendix-B.3.3-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="av1">
-<section id="appendix-B.3.6">
+<section id="appendix-B.3.4">
           <h4 id="name-av1">
 <a href="#name-av1" class="section-name selfRef">AV1</a>
           </h4>
-<p id="appendix-B.3.6-1">AV1 does not define a dedicated, codec-specific RTP payload format. Instead, it is commonly packetized using the Dependency Descriptor (DD) RTP header extension <span>[<a href="#DD" class="cite xref">DD</a>]</span>, which is codec-agnostic. Alternatively, the bitstream can be parsed directly.<a href="#appendix-B.3.6-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="appendix-B.3.6-2.1">
-              <p id="appendix-B.3.6-2.1.1"><strong>Superframe (Temporal Unit):</strong> An AV1 Temporal Unit consists of all OBUs associated with a single time instant (including all spatial/temporal layers). When using the Dependency Descriptor, the end of a Temporal Unit (superframe) is indicated when both the <code>end_of_frame</code> flag is 1 and the descriptor represents the highest active spatial/temporal layer in that Temporal Unit. In RTP packetization, the RTP marker bit (M) <span class="bcp14">MUST</span> be set to 1 on the last packet of the last layer frame of the Temporal Unit.<a href="#appendix-B.3.6-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.6-2.2">
-              <p id="appendix-B.3.6-2.2.1"><strong>Layer Frame (Picture):</strong> When using the Dependency Descriptor, the end of a layer frame is explicitly signaled by the <code>end_of_frame</code> bit set to 1 in the DD header. In the raw bitstream, a frame is composed of OBUs (Open Bitstream Units), and its end is reached when the last OBU of the frame (usually <code>OBU_FRAME</code> or the last <code>OBU_TILE_GROUP</code>) is fully received.<a href="#appendix-B.3.6-2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.6-2.3">
-              <p id="appendix-B.3.6-2.3.1"><strong>Tile/Subpicture:</strong> AV1 does not have a native "subpicture" concept but supports Tiles. Tiles are contained within an <code>OBU_FRAME</code> or <code>OBU_TILE_GROUP</code>. The end of a tile or tile group can be identified by parsing the OBU headers.<a href="#appendix-B.3.6-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+<p id="appendix-B.3.4-1">AV1 is specified in <span>[<a href="#AV1-Spec" class="cite xref">AV1-Spec</a>]</span>, and its RTP payload format in <span>[<a href="#AV1-RTP" class="cite xref">AV1-RTP</a>]</span>, which also defines the Dependency Descriptor. All OBUs associated with one time instant form a temporal unit, which may contain multiple frames: frames of different spatial layers and, within a layer, frames that are not shown followed by one shown frame (Section 7.5 of <span>[<a href="#AV1-Spec" class="cite xref">AV1-Spec</a>]</span>). The RTP marker bit only marks the last packet of a temporal unit, and setting it is only recommended (Section 4.2 of <span>[<a href="#AV1-RTP" class="cite xref">AV1-RTP</a>]</span>).<a href="#appendix-B.3.4-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.4-2">A frame in the sense of this document is a coded frame, i.e., a frame header OBU followed by its tile group OBUs, or a single frame OBU. A frame header with show_existing_frame set to 1 does not update the codec state, unless it shows a key frame, in which case all reference frames are refreshed (Section 7.4 of <span>[<a href="#AV1-Spec" class="cite xref">AV1-Spec</a>]</span>).<a href="#appendix-B.3.4-2" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.4-3">When the Dependency Descriptor (see above) is not used, the receiver needs to track the OBUs in the payload. A frame starts with an OBU_FRAME_HEADER or OBU_FRAME, and ends with that OBU_FRAME, with an OBU_FRAME_HEADER that has show_existing_frame set to 1, or with the OBU_TILE_GROUP for which tg_end equals NumTiles - 1 (Section 5.11.1 of <span>[<a href="#AV1-Spec" class="cite xref">AV1-Spec</a>]</span>), which requires parsing the frame header. The spatial layer of the frame is given by the spatial_id field of the OBU extension header.<a href="#appendix-B.3.4-3" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.4-4">AV1 tiles are not frames in the sense of this document: in-loop filtering is applied across tile boundaries, the entropy coding state saved at the end of a frame is taken from a single tile, and the reference frame update is performed for the frame as a whole (Section 7.20 of <span>[<a href="#AV1-Spec" class="cite xref">AV1-Spec</a>]</span>). AV1 has no concept of subpictures.<a href="#appendix-B.3.4-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="av2">
-<section id="appendix-B.3.7">
+<section id="appendix-B.3.5">
           <h4 id="name-av2">
 <a href="#name-av2" class="section-name selfRef">AV2</a>
           </h4>
-<p id="appendix-B.3.7-1">AV2 does not yet have an RTP payload format defined, but the bitstream structure is specified in <span>[<a href="#AV2-Spec" class="cite xref">AV2-Spec</a>]</span>. Similar to AV1, AV2 is structured around Open Bitstream Units (OBUs) and is designed to work with codec-agnostic header extensions like the Dependency Descriptor <span>[<a href="#DD" class="cite xref">DD</a>]</span>.<a href="#appendix-B.3.7-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="appendix-B.3.7-2.1">
-              <p id="appendix-B.3.7-2.1.1"><strong>Superframe (Temporal Unit):</strong> An AV2 Temporal Unit consists of all OBUs associated with a specific, distinct time instant. The end of the Temporal Unit is the end of the last layer frame in that unit, which is marked by the RTP marker bit (M) set to 1 on its last packet.<a href="#appendix-B.3.7-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.7-2.2">
-              <p id="appendix-B.3.7-2.2.1"><strong>Layer Frame (Picture):</strong> A layer frame in AV2 is a set of tile group OBUs with identical <code>obu_mlayer_id</code> (embedded layer ID) and <code>obu_tlayer_id</code> (temporal layer ID) values. Extended layers in AV2 are identified by <code>obu_xlayer_id</code> and can also be marked as individual layer frames if they are decoded independently. The end of a layer frame is reached when the last tile group OBU for that layer is received (e.g., <code>OBU_REGULAR_TILE_GROUP</code>, <code>OBU_CLOSED_LOOP_KEY</code>, etc.).<a href="#appendix-B.3.7-2.2.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="appendix-B.3.7-2.3">
-              <p id="appendix-B.3.7-2.3.1"><strong>Tile/Subpicture:</strong> AV2 supports Tiles. Like AV1, they are contained within tile group OBUs. The end of a tile group can be identified by parsing the OBU header and payload.<a href="#appendix-B.3.7-2.3.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
+<p id="appendix-B.3.5-1">AV2 is specified in <span>[<a href="#AV2-Spec" class="cite xref">AV2-Spec</a>]</span>. At the time of writing, no RTP payload format for AV2 has been published, so this section only describes the bitstream structure. As in AV1, the bitstream consists of OBUs, and a temporal unit contains all OBUs associated with one time instant. In addition to a temporal layer ID (obu_tlayer_id), an OBU header can carry an embedded layer ID (obu_mlayer_id) and an extended layer ID (obu_xlayer_id).<a href="#appendix-B.3.5-1" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.5-2">A frame in the sense of this document is a coded frame of one layer. This is either a sequence of tile group OBUs, starting with the one that has is_first_tile_group set to 1 and ending with the one for which tg_end equals NumTiles - 1 (Section 5.19 of <span>[<a href="#AV2-Spec" class="cite xref">AV2-Spec</a>]</span>), or a single OBU without tile data, such as a temporally interpolated prediction (TIP) frame or a bridge frame. Show existing frame (SEF) OBUs only output a previously decoded frame and do not update the codec state. Note that a layer can contain multiple coded frames in one temporal unit (Section 7.3 of <span>[<a href="#AV2-Spec" class="cite xref">AV2-Spec</a>]</span>), so the layer IDs alone do not delimit frames.<a href="#appendix-B.3.5-2" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.5-3">Embedded layers are used, e.g., for scalability within a view or for auxiliary data such as alpha or depth, and each embedded layer frame is a separate frame, similar to spatial layers in other codecs. Extended layers are decoded independently of each other, with separate decoder state and reference frame buffers (Section 7.6 of <span>[<a href="#AV2-Spec" class="cite xref">AV2-Spec</a>]</span>). They are used, e.g., for multiple views, or for independently decodable regions that are spatially composed into an output picture using an atlas. A frame of each extended layer is therefore always a separate frame in the sense of this document.<a href="#appendix-B.3.5-3" class="pilcrow">¶</a></p>
+<p id="appendix-B.3.5-4">As in AV1, tiles are not frames in the sense of this document, since the entropy coding state at the end of a frame and the reference frame update are derived for the frame as a whole. AV2 has no subpicture concept within a frame; independently decodable regions are instead coded as separate extended layers.<a href="#appendix-B.3.5-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
