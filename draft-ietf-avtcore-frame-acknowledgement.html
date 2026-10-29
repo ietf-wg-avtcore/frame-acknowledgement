@@ -12,7 +12,7 @@
        This document describes a mechanism for signaling which video frames have been received and decoded by a remote peer. It comprises an RTCP feedback message and an RTP header extension used to request said feedback. 
        One of the main use cases for this data is to implement various forms of Long Term Reference (LTR) reference structures. Additionally, the mechanism provides a way for receivers to request resynchronization frames that reference acknowledged frames, enabling efficient recovery from partial or full frame loss without requiring a full keyframe. 
     " name="description">
-<meta content="xml2rfc 3.34.0" name="generator">
+<meta content="xml2rfc 3.34.1" name="generator">
 <meta content="RTP" name="keyword">
 <meta content="RTCP" name="keyword">
 <meta content="Header Extension" name="keyword">
@@ -20,19 +20,19 @@
 <meta content="LTR" name="keyword">
 <meta content="draft-ietf-avtcore-frame-acknowledgement-02" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.34.0
-    Python 3.14.5
-    ConfigArgParse 1.7.5
+  xml2rfc 3.34.1
+    Python 3.14.8
+    ConfigArgParse 1.8.0
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.1.1
     natsort 8.4.0
-    platformdirs 4.10.0
+    platformdirs 4.13.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.33.1
-    wcwidth 0.8.2
+    wcwidth 0.9.2
 -->
 <link href="draft-ietf-avtcore-frame-acknowledgement.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -68,7 +68,6 @@
   src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
   unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: italic;
@@ -117,7 +116,6 @@
   src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
-
 @font-face {
   font-family: 'Lora';
   font-style: normal;
@@ -182,7 +180,6 @@
   font-display: swap;
   src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
-}
 }
 
 @font-face {
@@ -1225,7 +1222,7 @@ svg {
                 <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="auto internal xref">7.3</a>.  <a href="#name-length-8-bits" class="internal xref">Length (8 bits)</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
-                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-status-vector-variable-leng" class="internal xref">status vector (variable length)</a></p>
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="auto internal xref">7.4</a>.  <a href="#name-status-vector-variable-leng" class="internal xref">Status Vector (variable length)</a></p>
 </li>
             </ul>
 </li>
@@ -1239,7 +1236,7 @@ svg {
                 <p id="section-toc.1-1.8.2.2.1"><a href="#section-8.2" class="auto internal xref">8.2</a>.  <a href="#name-point-to-multi-point" class="internal xref">Point-to-Multi-Point</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.3">
-                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-using-acknowledgement-range" class="internal xref">Using acknowledgement ranges</a></p>
+                <p id="section-toc.1-1.8.2.3.1"><a href="#section-8.3" class="auto internal xref">8.3</a>.  <a href="#name-using-acknowledgement-range" class="internal xref">Using Acknowledgement Ranges</a></p>
 </li>
               <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8.2.4">
                 <p id="section-toc.1-1.8.2.4.1"><a href="#section-8.4" class="auto internal xref">8.4</a>.  <a href="#name-receiver-state-limits" class="internal xref">Receiver State Limits</a></p>
@@ -1327,9 +1324,9 @@ svg {
 <a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
       </h2>
 <p id="section-1-1">The most common way for realtime video to be transmitted is to encode a pretty much fixed scalability structure, such as those in the W3C <span>[<a href="#SVC" class="cite xref">SVC</a>]</span> Scalability mode list.<a href="#section-1-1" class="pilcrow">¶</a></p>
-<p id="section-1-2">In such a scenario, the video encoder produces frames "blindly" without real knowledge of what state the remote receiver is in. Using recovery mechanisms such as retransmission, forward error correction and fast-forwarding past skippable frames the receiver is assumed to be able to decode the video. In some cases those methods may not be enough, requiring keyframe requests to be sent as a last resort.<a href="#section-1-2" class="pilcrow">¶</a></p>
-<p id="section-1-3">On the other hand, if the encoder is able to reason about which frames have been received and decoded it can be more proactive. One way is to store frames that are known to be received so that they can be later used as guaranteed good references in the case of e.g. large loss events, avoiding the need for potentially large retransmissions etc. Collectively this is often referred to as "Long Term Reference" structures or LTR for short, although the exact structure may vary.<a href="#section-1-3" class="pilcrow">¶</a></p>
-<p id="section-1-4">In order to achieve this the sender must be able to reason about the state of the receiver, necessitating the need for feedback signals. In this document a new RTCP message called "Frame Acknowledgement" is introduced as a codec agnostic feedback message for this purpose. Further, an RTP header extension is introduced that allows the sender to actively request feedback on decoding of the associated frame. This allows the sender to both request quick feedback on frames that are important for latency, and enables resilience against loss of feedback packets.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-2">In such a scenario, the video encoder produces frames "blindly" without real knowledge of what state the remote receiver is in. Using recovery mechanisms such as retransmission, forward error correction and fast-forwarding past skippable frames, the receiver is assumed to be able to decode the video. In some cases those methods may not be enough, requiring keyframe requests to be sent as a last resort.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<p id="section-1-3">On the other hand, if the encoder is able to reason about which frames have been received and decoded, it can be more proactive. One way is to store frames that are known to be received so that they can be later used as guaranteed good references in the case of e.g. large loss events, avoiding the need for potentially large retransmissions etc. Collectively this is often referred to as "Long Term Reference" structures or LTR for short, although the exact structure may vary.<a href="#section-1-3" class="pilcrow">¶</a></p>
+<p id="section-1-4">In order to achieve this, the sender must be able to reason about the state of the receiver, necessitating feedback signals. In this document, a new RTCP message called "Frame Acknowledgement" is introduced as a codec agnostic feedback message for this purpose. Further, an RTP header extension is introduced that allows the sender to actively request feedback on decoding of the associated frame. This both allows the sender to request quick feedback on frames that are important for latency, and enables resilience against loss of feedback packets.<a href="#section-1-4" class="pilcrow">¶</a></p>
 <p id="section-1-5">Additionally, there are situations where the receiver may experience partial or full frame loss that cannot be recovered through retransmission or other means. In such cases, the receiver may wish to skip the unrecoverable frame and move forward, but needs a frame encoded with a reference that has been acknowledged. The Frame Acknowledgement Feedback message provides a mechanism for the receiver to request such resynchronization frames, avoiding the need for a full keyframe and thereby minimizing recovery latency and bandwidth usage.<a href="#section-1-5" class="pilcrow">¶</a></p>
 <p id="section-1-6">Note that it is allowed to report a frame as decoded even if the decode process is not complete - as long as the receiver guarantees that it will attempt to decode the frame. The rationale for this is that we want to reduce the feedback delay as much as possible. Should the decoding of a frame that has been acknowledged fail, then the receiver <span class="bcp14">MUST</span> request a keyframe to recover, even if the failed decoding belongs to a droppable layer.<a href="#section-1-6" class="pilcrow">¶</a></p>
 </section>
@@ -1352,8 +1349,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-applicability" class="section-name selfRef">Applicability</a>
       </h2>
 <p id="section-3-1">Frame Acknowledgement can be used for video streams in most topologies. It is also designed to be codec agnostic.<a href="#section-3-1" class="pilcrow">¶</a></p>
-<p id="section-3-2">In terms of <span>[<a href="#RFC7667" class="cite xref">RFC7667</a>]</span>, Point-to-Point is the most straightforward target as it is easiest to reason about a single receiver. A Media Translator or other systems that include a decoder are similarly easy - from the perspective of the sender the middle box is the receiver.<a href="#section-3-2" class="pilcrow">¶</a></p>
-<p id="section-3-3">If a Transport Translator is used for Point-to-Multi-Point, then the middlebox must make sure to make valid translations. See section on <span><a href="#frame_id_considerations" class="internal xref">Frame ID considerations</a> (<a href="#frame_id_considerations" class="auto internal xref">Section 8</a>)</span> below.<a href="#section-3-3" class="pilcrow">¶</a></p>
+<p id="section-3-2">In terms of <span>[<a href="#RFC7667" class="cite xref">RFC7667</a>]</span>, Point-to-Point is the most straightforward target as it is easiest to reason about a single receiver. A Media Translator or other systems that include a decoder are similarly easy - from the perspective of the sender, the middlebox is the receiver.<a href="#section-3-2" class="pilcrow">¶</a></p>
+<p id="section-3-3">If a Transport Translator is used for Point-to-Multi-Point, then the middlebox must make sure to make valid translations. See the section on <span><a href="#frame_id_considerations" class="internal xref">Frame ID considerations</a> (<a href="#frame_id_considerations" class="auto internal xref">Section 8</a>)</span> below.<a href="#section-3-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="existing-feedback-formats">
@@ -1364,8 +1361,8 @@ appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶<
 <p id="section-4-1">This section provides an overview, for informational purposes, of some existing feedback formats that could be seen as alternatives.<a href="#section-4-1" class="pilcrow">¶</a></p>
 <p id="section-4-2">NACK, defined in <span>[<a href="#RFC4585" class="cite xref">RFC4585</a>]</span>, provides only requests for packets the receiver is interested in having retransmitted. Absence of feedback is a poor signal for acknowledgement, especially since said feedback can be lost.<a href="#section-4-2" class="pilcrow">¶</a></p>
 <p id="section-4-3"><span>[<a href="#RFC8888" class="cite xref">RFC8888</a>]</span> and <span>[<a href="#TWCC" class="cite xref">TWCC</a>]</span> provide per-packet acknowledgement and so are more useful. A mapping from packet(s) to frame needs to happen but that is not a big problem. However, even if a frame is confirmed to be received there is no guarantee that it gets decoded.<a href="#section-4-3" class="pilcrow">¶</a></p>
-<p id="section-4-4">Reference Picture Selection Indication (RPSI) is another existing message, but it puts the logic of requesting a particular reference frame in the receiver - significantly complicating the system especially in Point-to-Multi-Point systems. It is further codec specific, and several modern codecs lack a specification - including AV1 and H.266.<a href="#section-4-4" class="pilcrow">¶</a></p>
-<p id="section-4-5">Loss Notification <span>[<a href="#LNTF" class="cite xref">LNTF</a>]</span> was a proposed RTCP message intended to solve most of these problems, but it lacks resilience against loss of feedback and also cannot handle out-of-order acknowledgements. The latter makes for instance single-SSRC simulcast structures (e.g. SxTx modes in <span>[<a href="#SVC" class="cite xref">SVC</a>]</span>) impossible.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-4">Reference Picture Selection Indication (RPSI) is another existing message, but it puts the logic of requesting a particular reference frame in the receiver - significantly complicating the system, especially in Point-to-Multi-Point systems. It is further codec specific, and several modern codecs lack a specification - including AV1 and H.266.<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">Loss Notification <span>[<a href="#LNTF" class="cite xref">LNTF</a>]</span> was a proposed RTCP message intended to solve most of these problems, but it lacks resilience against loss of feedback and also cannot handle out-of-order acknowledgements. The latter makes, for instance, single-SSRC simulcast structures (e.g. SxTx modes in <span>[<a href="#SVC" class="cite xref">SVC</a>]</span>) impossible.<a href="#section-4-5" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="requirements">
@@ -1426,7 +1423,7 @@ It <span class="bcp14">SHOULD</span> appear on the last packet of a video frame,
         <h3 id="name-frame-identifier">
 <a href="#section-6.1" class="section-number selfRef">6.1. </a><a href="#name-frame-identifier" class="section-name selfRef">Frame Identifier</a>
         </h3>
-<p id="section-6.1-1">In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is a 16-bit unsigned integer field, that wraps around to 0 on overflow.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
+<p id="section-6.1-1">In order to request and receive information about decoded frames, we must be able to identify them. The Frame Acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is a 16-bit unsigned integer field that wraps around to 0 on overflow.<a href="#section-6.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="frame-acknowledgment-request">
@@ -1434,8 +1431,8 @@ It <span class="bcp14">SHOULD</span> appear on the last packet of a video frame,
         <h3 id="name-frame-acknowledgment-reques">
 <a href="#section-6.2" class="section-number selfRef">6.2. </a><a href="#name-frame-acknowledgment-reques" class="section-name selfRef">Frame Acknowledgment Request</a>
         </h3>
-<p id="section-6.2-1">In order to get feedback on the state of the remote decoder, the sender actively requests such feedback using the same frame acknowledgement header extension that is also used for frame identification.
-The feedback request comprises a Start Frame ID and Length field. Specifying the range explicitly has several advantages, including reliable delivery of the feedback and the ability to signal state relating to multiple independent streams interleaved within a single SSRC.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
+<p id="section-6.2-1">In order to get feedback on the state of the remote decoder, the sender actively requests such feedback using the same Frame Acknowledgement header extension that is also used for frame identification.
+The feedback request comprises a Feedback Start and a Feedback Length field. Specifying the range explicitly has several advantages, including reliable delivery of the feedback and the ability to signal state relating to multiple independent streams interleaved within a single SSRC.<a href="#section-6.2-1" class="pilcrow">¶</a></p>
 <p id="section-6.2-2">If a new Frame Acknowledgement Request is sent with an incremented Feedback Start, all status values prior to that Frame ID are considered as acknowledged and can be culled by the receiver. A sender <span class="bcp14">MUST NOT</span> request feedback prior to either the last acknowledged Frame ID or the start of the stream.<a href="#section-6.2-2" class="pilcrow">¶</a></p>
 </section>
 </div>
@@ -1446,8 +1443,8 @@ The feedback request comprises a Start Frame ID and Length field. Specifying the
         </h3>
 <p id="section-6.3-1">This section describes the data layout for the Frame Acknowledgment RTP Header Extension.
 The extension data starts with the FFR/Reserved byte.<a href="#section-6.3-1" class="pilcrow">¶</a></p>
-<p id="section-6.3-2">For a One-Byte Header (as defined in <span>[<a href="#RFC5285" class="cite xref">RFC5285</a>]</span>, Section 4.2), the <code>ID</code> field identifies the extension, and the <code>len</code> field is a 4-bit value <code>N</code> that indicates the number of data bytes following the <code>ID</code> and <code>len</code> fields, <em>minus one</em>. Thus, the total number of bytes for the extension data is <code>N+1</code>.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
-<p id="section-6.3-3">For a Two-Byte Header (as defined in <span>[<a href="#RFC5285" class="cite xref">RFC5285</a>]</span>, Section 4.3), the <code>ID</code> field identifies the extension, and the 8-bit <code>length</code> field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).<a href="#section-6.3-3" class="pilcrow">¶</a></p>
+<p id="section-6.3-2">For a One-Byte Header (as defined in <span>[<a href="#RFC8285" class="cite xref">RFC8285</a>]</span>, Section 4.2), the <code>ID</code> field identifies the extension, and the <code>len</code> field is a 4-bit value <code>N</code> that indicates the number of data bytes following the <code>ID</code> and <code>len</code> fields, <em>minus one</em>. Thus, the total number of bytes for the extension data is <code>N+1</code>.<a href="#section-6.3-2" class="pilcrow">¶</a></p>
+<p id="section-6.3-3">For a Two-Byte Header (as defined in <span>[<a href="#RFC8285" class="cite xref">RFC8285</a>]</span>, Section 4.3), the <code>ID</code> field identifies the extension, and the 8-bit <code>length</code> field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).<a href="#section-6.3-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-6.3-4">
 <pre>
  Extension Data:
@@ -1477,7 +1474,7 @@ The extension data starts with the FFR/Reserved byte.<a href="#section-6.3-1" cl
 <ul class="normal">
 <li class="normal" id="section-6.3.1-2.1">
               <p id="section-6.3.1-2.1.1"><strong>00: Frame ID only.</strong>
-The FFR/Reserved byte is followed by a one-byte Frame ID field.
+The FFR/Reserved byte is followed by a two-byte Frame ID field.
 Total extension data bytes = 3 (FFR/Reserved + Frame ID).
 For one-byte header: <code>len</code> = 2.
 For two-byte header: <code>length</code> = 3.
@@ -1485,7 +1482,7 @@ No feedback is explicitly requested by this header.<a href="#section-6.3.1-2.1.1
 </li>
             <li class="normal" id="section-6.3.1-2.2">
               <p id="section-6.3.1-2.2.1"><strong>01: Frame ID + implicit feedback request.</strong>
-The FFR/Reserved byte is followed by a one-byte Frame ID field.
+The FFR/Reserved byte is followed by a two-byte Frame ID field.
 Total extension data bytes = 3 (FFR/Reserved + Frame ID).
 For one-byte header: <code>len</code> = 2.
 For two-byte header: <code>length</code> = 3.
@@ -1532,7 +1529,7 @@ An unsigned integer that corresponds to the first Frame ID (inclusive) the sende
 <p id="section-6.3.4-1">Present if FFR is 10.
 An unsigned integer that indicates the number of consecutive frames the sender is requesting feedback for, starting from Feedback Start. A value of 0 means no frames are being requested. A value of 1 means only the frame identified by Feedback Start is requested. The range is Feedback Start to Feedback Start + Feedback Length - 1, inclusive, with wrap-around logic applied to Frame IDs.<a href="#section-6.3.4-1" class="pilcrow">¶</a></p>
 <p id="section-6.3.4-2">Note that since the Frame ID and Feedback Start are 16-bit fields that wrap, care must be taken when calculating ranges. For example, a request with Feedback Start = 65534 and Feedback Length = 3 indicates the sender is requesting feedback for frames with Frame IDs 65534, 65535, and 0.<a href="#section-6.3.4-2" class="pilcrow">¶</a></p>
-<p id="section-6.3.4-3">If a sender is not interested in feedback for frames prior to and including a given Frame ID, it can effectively signal this by sending a request (FFR=01, 10, or 10) where the Feedback Start (or Frame ID for FFR=01) is more recent. This implicitly acknowledges prior frames up to the new Feedback Start. Alternatively, a Feedback Length of 0 can be used with FFR=10 if no specific frames need feedback but an acknowledgment point needs to be set.<a href="#section-6.3.4-3" class="pilcrow">¶</a></p>
+<p id="section-6.3.4-3">If a sender is not interested in feedback for frames prior to and including a given Frame ID, it can effectively signal this by sending a request (FFR=01 or 10) where the Feedback Start (or Frame ID for FFR=01) is more recent. This implicitly acknowledges prior frames up to the new Feedback Start. Alternatively, a Feedback Length of 0 can be used with FFR=10 if no specific frames need feedback but an acknowledgment point needs to be set.<a href="#section-6.3.4-3" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1574,7 +1571,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
           <h4 id="name-resync-request-flag-1-bit">
 <a href="#section-7.1.1" class="section-number selfRef">7.1.1. </a><a href="#name-resync-request-flag-1-bit" class="section-name selfRef">Resync Request Flag (1 bit)</a>
           </h4>
-<p id="section-7.1.1-1">The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, Start Frame ID should indicate latest decoded frame ID and status vector containing frames up to the latest received Frame ID assuming length field is less than 256.<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
+<p id="section-7.1.1-1">The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, it indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, the Start Frame ID should indicate the latest decoded Frame ID, and the status vector should contain frames up to the latest received Frame ID, assuming the Length field is less than 256.<a href="#section-7.1.1-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="reserved-7-bits">
@@ -1606,7 +1603,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
 <div id="status-vector-variable-length">
 <section id="section-7.4">
         <h3 id="name-status-vector-variable-leng">
-<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-status-vector-variable-leng" class="section-name selfRef">status vector (variable length)</a>
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-status-vector-variable-leng" class="section-name selfRef">Status Vector (variable length)</a>
         </h3>
 <p id="section-7.4-1">A bit vector of the size indicated by the Length field. Each bit corresponds to a Frame ID, starting from Start Frame ID and incrementing by one for each subsequent bit.
 *   A value of <strong>0</strong> indicates the frame has not been received or has not been decoded (or is not expected to be decoded).
@@ -1624,13 +1621,13 @@ An unsigned integer that indicates the number of consecutive frames the sender i
 <p id="section-8-1">As stated above, the sender <span class="bcp14">MUST</span> increment the Frame ID by one for each new frame with the Frame Acknowledgement header extension present, in sending order. More than that, it must make sure that no wrap-around ambiguity can occur.<a href="#section-8-1" class="pilcrow">¶</a></p>
 <p id="section-8-2">Since feedback is only really necessary for frames which the codec stores in a reference buffer pending future use, the number of outstanding frames is in practice limited by the number of available reference buffers. E.g. for AV1, the upper limit will be 8. Although the optimal behavior will be application dependent, it is often advisable to spread reference buffer usage out across an RTT and to cull earlier buffer usage once later frames have been acknowledged.<a href="#section-8-2" class="pilcrow">¶</a></p>
 <p id="section-8-3">Also note that no exceptions are made for keyframes. I.e. keyframes may or may not be assigned a Frame ID, and any frames preceding a keyframe must still be included in the feedback if requested by the media sender - despite the keyframe being a new recovery point.<a href="#section-8-3" class="pilcrow">¶</a></p>
-<p id="section-8-4">The Frame ID sequence (and consequently the feedback messages corresponding to it) is unique per sender/receiver SSRC pair. Thus if a sender or receiver SSRC is changed, a new Frame ID sequence is started and all previous state is discarded. Otherwise no gaps or resets in the Frame ID sequence are allowed.<a href="#section-8-4" class="pilcrow">¶</a></p>
+<p id="section-8-4">The Frame ID sequence (and consequently the feedback messages corresponding to it) is unique per sender/receiver SSRC pair. Thus, if a sender or receiver SSRC is changed, a new Frame ID sequence is started and all previous state is discarded. Otherwise, no gaps or resets in the Frame ID sequence are allowed.<a href="#section-8-4" class="pilcrow">¶</a></p>
 <div id="resync-request-handling">
 <section id="section-8.1">
         <h3 id="name-resync-request-handling">
 <a href="#section-8.1" class="section-number selfRef">8.1. </a><a href="#name-resync-request-handling" class="section-name selfRef">Resync Request Handling</a>
         </h3>
-<p id="section-8.1-1">When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it <span class="bcp14">MAY</span> send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded Frame ID up to latest received Frame ID.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
+<p id="section-8.1-1">When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it <span class="bcp14">MAY</span> send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify a status vector from the latest decoded Frame ID up to the latest received Frame ID.<a href="#section-8.1-1" class="pilcrow">¶</a></p>
 <p id="section-8.1-2">Upon receiving a resync request, the sender <span class="bcp14">SHOULD</span>:
 1. Verify that the decoded Frame ID corresponds to a frame that is still available in its reference buffer.
 2. Encode the next frame using the specified frame or another frame with references it knows to be available at the receiver.
@@ -1643,19 +1640,23 @@ An unsigned integer that indicates the number of consecutive frames the sender i
         <h3 id="name-point-to-multi-point">
 <a href="#section-8.2" class="section-number selfRef">8.2. </a><a href="#name-point-to-multi-point" class="section-name selfRef">Point-to-Multi-Point</a>
         </h3>
-<p id="section-8.2-1">When considering a multi-way application with an SFU/SFM-type relay in the middle, the middlebox may need to do translations/rewriting of Frame IDs such that the outgoing FrameIDs from a middlebox to a receiver still fulfill the requirement that the FrameIDs are incremented by one for each new frame that is marked for feedback. This must be true even if independent video streams for different senders are multiplexed onto the same SSRC. Further the middlebox should typically not acknowledge a frame to a sender unless all active receivers have acknowledged that frame.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
+<p id="section-8.2-1">When considering a multi-way application with an SFU/SFM-type relay in the middle, the middlebox may need to do translations/rewriting of Frame IDs such that the outgoing Frame IDs from a middlebox to a receiver still fulfill the requirement that the Frame IDs are incremented by one for each new frame that is marked for feedback. This must be true even if independent video streams for different senders are multiplexed onto the same SSRC. Further, the middlebox should typically not acknowledge a frame to a sender unless all active receivers have acknowledged that frame.<a href="#section-8.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="using-acknowledgement-ranges">
 <section id="section-8.3">
         <h3 id="name-using-acknowledgement-range">
-<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-using-acknowledgement-range" class="section-name selfRef">Using acknowledgement ranges</a>
+<a href="#section-8.3" class="section-number selfRef">8.3. </a><a href="#name-using-acknowledgement-range" class="section-name selfRef">Using Acknowledgement Ranges</a>
         </h3>
-<p id="section-8.3-1">The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
-<p id="section-8.3-2">For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
+<p id="section-8.3-1">The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, then only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed, the situation gets more complex.<a href="#section-8.3-1" class="pilcrow">¶</a></p>
+<p id="section-8.3-2">For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+<div class="alignLeft art-text artwork" id="section-8.3-3">
+<pre>
 S1: 100 -&gt; 101 (ID = 1) -&gt; 102 -&gt; 103
 S0: 100 -&gt; 101 -&gt; 102 (ID = 2) -&gt; 103
-Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span> when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.<a href="#section-8.3-2" class="pilcrow">¶</a></p>
+</pre><a href="#section-8.3-3" class="pilcrow">¶</a>
+</div>
+<p id="section-8.3-4">Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason that the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in <span><a href="#receiver_state_limits" class="internal xref">Receiver State Limits</a> (<a href="#receiver_state_limits" class="auto internal xref">Section 8.4</a>)</span> when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.<a href="#section-8.3-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="receiver_state_limits">
@@ -1676,7 +1677,7 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
         <h3 id="name-out-of-order-message-handli">
 <a href="#section-8.5" class="section-number selfRef">8.5. </a><a href="#name-out-of-order-message-handli" class="section-name selfRef">Out-of-order Message Handling</a>
         </h3>
-<p id="section-8.5-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
+<p id="section-8.5-1">Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to, e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than those contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.<a href="#section-8.5-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1725,7 +1726,7 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <a href="#section-9.3" class="section-number selfRef">9.3. </a><a href="#name-receiver-triggered-resync" class="section-name selfRef">Receiver-Triggered Resync</a>
         </h3>
 <p id="section-9.3-1">A receiver that supports sending resync requests (R=1 in the Frame Acknowledgement Feedback message) <span class="bcp14">MAY</span> indicate that it will trigger resync based on decode starvation, and <span class="bcp14">MAY</span> configure the timeout for doing so, using an optional parameter on the "frame-acknowledgement" rtcp-fb attribute.<a href="#section-9.3-1" class="pilcrow">¶</a></p>
-<p id="section-9.3-2">The "resync-timeout" parameter specifies the time in milliseconds that the receiver will wait for decoding to make progress before sending a resync request. Decode starvation occurs when the receiver cannot advance decoding (e.g., it is blocked waiting for a frame or data that cannot be recovered). If decoding does not make progress for the specified duration, the receiver should send a Frame Acknowledgement Feedback message with the R flag set and a Resync Frame ID referencing the last successfully decoded frame.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
+<p id="section-9.3-2">The "resync-timeout" parameter specifies the time in milliseconds that the receiver will wait for decoding to make progress before sending a resync request. Decode starvation occurs when the receiver cannot advance decoding (e.g., it is blocked waiting for a frame or data that cannot be recovered). If decoding does not make progress for the specified duration, the receiver should send a Frame Acknowledgement Feedback message with the R flag set and the Start Frame ID referencing the last successfully decoded frame.<a href="#section-9.3-2" class="pilcrow">¶</a></p>
 <p id="section-9.3-3">Syntax:<a href="#section-9.3-3" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.3-4">
 <pre>
@@ -1733,7 +1734,7 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 </pre><a href="#section-9.3-4" class="pilcrow">¶</a>
 </div>
 <p id="section-9.3-5">The value "timeout-ms" is an integer in the range 1-65535, representing the timeout in milliseconds. If "resync-timeout" is omitted, the receiver <span class="bcp14">MAY</span> still send resync requests at its discretion (e.g., on unrecoverable loss) but need not use a timeout-based trigger. Inclusion of "resync-timeout" indicates that the receiver supports and shall use timeout-based resync when decode starves for at least the given duration.<a href="#section-9.3-5" class="pilcrow">¶</a></p>
-<p id="section-9.3-6">Example attribute lines in SDP (Only one of the format must be present per payload type):<a href="#section-9.3-6" class="pilcrow">¶</a></p>
+<p id="section-9.3-6">Example attribute lines in SDP (only one of the formats is to be present per payload type):<a href="#section-9.3-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="section-9.3-7">
 <pre>
    a=rtcp-fb:96 frame-acknowledgement
@@ -1741,7 +1742,7 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
    a=rtcp-fb:96 frame-acknowledgement;resync-timeout=500
 </pre><a href="#section-9.3-7" class="pilcrow">¶</a>
 </div>
-<p id="section-9.3-8">The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps use-cases to choose how long receiver need to wait before triggering resync request. Media sender can adjust its interval to request frame acknowledgement feedback if "resync-timeout" based resync feedback is supported by receiver. Media sender can avoid sending frequent frame acknowledgement requests depending on the use-case. Additionally sender could consider RTT during handling of resync feedbacks.<a href="#section-9.3-8" class="pilcrow">¶</a></p>
+<p id="section-9.3-8">The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps applications choose how long the receiver needs to wait before triggering a resync request. A media sender can adjust its interval for requesting frame acknowledgement feedback if the receiver supports "resync-timeout" based resync feedback. A media sender can avoid sending frequent frame acknowledgement requests, depending on the use case. Additionally, the sender could consider the RTT when handling resync feedback.<a href="#section-9.3-8" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="status_window_size_signaling">
@@ -1773,8 +1774,8 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
       <h2 id="name-security-considerations">
 <a href="#section-10" class="section-number selfRef">10. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-10-1">The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially in an indirect way which frames the sender sees as important for recovery.<a href="#section-10-1" class="pilcrow">¶</a></p>
-<p id="section-10-2">This data should however not pose any significant privacy or security risks.<a href="#section-10-2" class="pilcrow">¶</a></p>
+<p id="section-10-1">The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially, in an indirect way, which frames the sender sees as important for recovery.<a href="#section-10-1" class="pilcrow">¶</a></p>
+<p id="section-10-2">This data should, however, not pose any significant privacy or security risks.<a href="#section-10-2" class="pilcrow">¶</a></p>
 <div id="state-exhaustion">
 <section id="section-10.1">
         <h3 id="name-state-exhaustion">
@@ -1801,7 +1802,7 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <a href="#section-11" class="section-number selfRef">11. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
 <p id="section-11-1">The RTP header extension needs to have a URI identifier assigned by IANA. See <span>[<a href="#IANAEXT" class="cite xref">IANAEXT</a>]</span>.<a href="#section-11-1" class="pilcrow">¶</a></p>
-<p id="section-11-2">The RTCP message uses PT = 205 (RTPFB, Generic RTP Feedback). As of writing, the next available FMT value is 12. A dedicated ID needs to be assigned by IANA. See <span>[<a href="#IANARTCP" class="cite xref">IANARTCP</a>]</span>.<a href="#section-11-2" class="pilcrow">¶</a></p>
+<p id="section-11-2">The RTCP message uses PT = 205 (RTPFB, Generic RTP Feedback). At the time of writing, the next available FMT value is 12. A dedicated ID needs to be assigned by IANA. See <span>[<a href="#IANARTCP" class="cite xref">IANARTCP</a>]</span>.<a href="#section-11-2" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -1855,10 +1856,6 @@ Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some
 <dt id="RFC4585">[RFC4585]</dt>
         <dd>
 <span class="refAuthor">Ott, J.</span>, <span class="refAuthor">Wenger, S.</span>, <span class="refAuthor">Sato, N.</span>, <span class="refAuthor">Burmeister, C.</span>, and <span class="refAuthor">J. Rey</span>, <span class="refTitle">"Extended RTP Profile for Real-time Transport Control Protocol (RTCP)-Based Feedback (RTP/AVPF)"</span>, <span class="seriesInfo">RFC 4585</span>, <span class="seriesInfo">DOI 10.17487/RFC4585</span>, <time datetime="2006-07" class="refDate">July 2006</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc4585">https://www.rfc-editor.org/rfc/rfc4585</a>&gt;</span>. </dd>
-<dd class="break"></dd>
-<dt id="RFC5285">[RFC5285]</dt>
-        <dd>
-<span class="refAuthor">Singer, D.</span> and <span class="refAuthor">H. Desineni</span>, <span class="refTitle">"A General Mechanism for RTP Header Extensions"</span>, <span class="seriesInfo">RFC 5285</span>, <span class="seriesInfo">DOI 10.17487/RFC5285</span>, <time datetime="2008-07" class="refDate">July 2008</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc5285">https://www.rfc-editor.org/rfc/rfc5285</a>&gt;</span>. </dd>
 <dd class="break"></dd>
 <dt id="RFC7667">[RFC7667]</dt>
         <dd>
@@ -1953,7 +1950,7 @@ Media Sender                              Media Receiver
     |                                          |
 </pre><a href="#appendix-A.2-3" class="pilcrow">¶</a>
 </div>
-<p id="appendix-A.2-4">The Media Receiver decodes all four frames and updates its status vector. On decoding the fourth frame it responds with an RTCP Frame Acknowledgement Feedback message with R=0 (not a resync request), Start Frame ID=0, Length=4, and a status vector of 1111 indicating all four frames were successfully decoded.<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-4">The Media Receiver decodes all four frames and updates its status vector. On decoding the fourth frame, it responds with an RTCP Frame Acknowledgement Feedback message with R=0 (not a resync request), Start Frame ID=0, Length=4, and a status vector of 1111 indicating all four frames were successfully decoded.<a href="#appendix-A.2-4" class="pilcrow">¶</a></p>
 <p id="appendix-A.2-5">The Media Sender now knows that Frame IDs 0-3 are confirmed as decoded and can safely be used as long-term references.<a href="#appendix-A.2-5" class="pilcrow">¶</a></p>
 <p id="appendix-A.2-6">For subsequent frames, the sender may choose not to mark some frames with Frame IDs if feedback is not needed. When confirmation is needed for a specific frame, the sender can use implicit feedback requests (FFR=01):<a href="#appendix-A.2-6" class="pilcrow">¶</a></p>
 <div class="alignLeft art-text artwork" id="appendix-A.2-7">
@@ -1971,7 +1968,7 @@ Media Sender                              Media Receiver
 </pre><a href="#appendix-A.2-7" class="pilcrow">¶</a>
 </div>
 <p id="appendix-A.2-8">Frames at timestamps 400, 500, and 600 are sent without the Frame Acknowledgement extension since the sender does not need feedback for them. The frame at timestamp 700 is marked with Frame ID=4 (incrementing from the last assigned ID) and uses FFR=01 for an implicit feedback request.<a href="#appendix-A.2-8" class="pilcrow">¶</a></p>
-<p id="appendix-A.2-9">On decoding the frame with ID=4 updates its status vector with just one entry for Frame ID=4. It sends feedback with Start Frame ID=4, and implicitly signals that frames prior to ID=4 (Frame IDs 0-3) are no longer being tracked.<a href="#appendix-A.2-9" class="pilcrow">¶</a></p>
+<p id="appendix-A.2-9">On decoding the frame with ID=4, the Media Receiver updates its status vector with just one entry for Frame ID=4. It sends feedback with Start Frame ID=4, and implicitly signals that frames prior to ID=4 (Frame IDs 0-3) are no longer being tracked.<a href="#appendix-A.2-9" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sender-side-recovery-from-frame-loss">
@@ -2056,7 +2053,7 @@ Media Sender                              Media Receiver
             <p id="appendix-A.4-6.4.1">The frame at timestamp 2300 is marked with Frame ID=21 (incrementing from the last assigned ID of 20) and uses FFR=10 to request feedback to confirm it was decoded<a href="#appendix-A.4-6.4.1" class="pilcrow">¶</a></p>
 </li>
         </ol>
-<p id="appendix-A.4-7">Frames at timestamps 2100 and 2200 are sent without the Frame Acknowledgement extension since the sender does not need feedback for them. The frame at timestamp 2200 arrives but cannot be decoded since it references the frame at timestamp 2100. The Media Receiver receives the frame at timestamp 2300 (assigned Frame ID=21) and can decode it successfully since it only references the frame at timestamp 2000 (Frame ID 20). The decoder is back in sync, and the receiver sends acknowledgement with R=0, Start Frame ID=20, Length=2, and status vector=11 (Frame IDs 20 and 21 decoded).<a href="#appendix-A.4-7" class="pilcrow">¶</a></p>
+<p id="appendix-A.4-7">Frames at timestamps 2100 and 2200 are sent without the Frame Acknowledgement extension since the sender does not need feedback for them. The frame at timestamp 2200 arrives but cannot be decoded since it references the frame at timestamp 2100. The Media Receiver receives the frame at timestamp 2300 (assigned Frame ID=21) and can decode it successfully since it only references the frame at timestamp 2000 (Frame ID 20). The decoder is back in sync, and the receiver sends an acknowledgement with R=0, Start Frame ID=20, Length=2, and status vector=11 (Frame IDs 20 and 21 decoded).<a href="#appendix-A.4-7" class="pilcrow">¶</a></p>
 <p id="appendix-A.4-8">If the Media Sender no longer had the frame at timestamp 2000 available in its reference buffer, it would instead encode and send a keyframe (IDR frame) to allow the receiver to resynchronize.<a href="#appendix-A.4-8" class="pilcrow">¶</a></p>
 </section>
 </div>
