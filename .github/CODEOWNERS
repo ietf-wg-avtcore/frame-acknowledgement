@@ -1,0 +1,3 @@
+# Automatically generated CODEOWNERS
+# Regenerate with `make update-codeowners`
+draft-ietf-avtcore-frame-acknowledgement.md sprang@google.com gchandok.ietf@gmail.com smajali@nvidia.com
