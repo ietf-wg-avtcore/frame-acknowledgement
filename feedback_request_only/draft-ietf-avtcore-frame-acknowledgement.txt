@@ -324,12 +324,18 @@ Table of Contents
    Acknowledgment Extension (Section 6).  Instead, it MAY be attached to
    any RTP packet of the RTP stream, e.g., any packet of a frame, or a
    packet that carries no media payload, such as a padding-only packet.
-   The RTP timestamp, marker bit and payload of that packet have no
-   significance for the request.  If the request is attached to a packet
-   of an associated retransmission stream [RFC4588], it refers to the
-   Frame IDs of the original media stream.  Receivers MUST process the
-   Frame Acknowledgement header extension also in packets that do not
-   carry any media payload.
+   A padding-only packet is an RTP packet without any media payload
+   data: following the RTP header, including any header extensions, the
+   packet is either empty or, if the P (padding) bit is set, contains
+   only padding octets, the last of which contains a count of how many
+   padding octets should be ignored, including itself (Section 5.1 of
+   [RFC3550]).  Such packets are commonly used, e.g., to probe the
+   available bandwidth.  The RTP timestamp, marker bit and payload of
+   that packet have no significance for the request.  If the request is
+   attached to a packet of an associated retransmission stream
+   [RFC4588], it refers to the Frame IDs of the original media stream.
+   Receivers MUST process the Frame Acknowledgement header extension
+   also in packets that do not carry any media payload.
 
    A request with FFR=11 MUST NOT include Frame IDs that the sender has
    not yet sent.  Apart from not carrying a Frame ID, it is processed in
