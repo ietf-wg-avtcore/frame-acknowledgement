@@ -9,8 +9,8 @@ number:
 date: 2026-07-06
 consensus: true
 v: 3
-area: AREA
-workgroup: avtcore WG
+area: "Web and Internet Transport"
+workgroup: "Audio/Video Transport Core Maintenance"
 keyword:
  - RTP
  - RTCP
@@ -18,12 +18,12 @@ keyword:
  - Video
  - LTR
 venue:
-  group: avtcore WG
-  type: Working Group
-  mail: avt@ietf.org
-  arch: https://datatracker.ietf.org/wg/avtcore
-  github: ietf-wg-avtcore/frame-acknowledgement
-  latest: https://github.com/ietf-wg-avtcore/frame-acknowledgement/blob/main/draft-ietf-avtcore-frame-acknowledgement.md
+  group: "Audio/Video Transport Core Maintenance"
+  type: "Working Group"
+  mail: "avt@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/avt/"
+  github: "ietf-wg-avtcore/frame-acknowledgement"
+  latest: "https://ietf-wg-avtcore.github.io/frame-acknowledgement/draft-ietf-avtcore-frame-acknowledgement.html"
 
 author:
  -
