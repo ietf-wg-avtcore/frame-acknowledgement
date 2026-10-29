@@ -85,11 +85,11 @@ One of the main use cases for this data is to implement various forms of Long Te
 
 The most common way for realtime video to be transmitted is to encode a pretty much fixed scalability structure, such as those in the W3C {{SVC}} Scalability mode list.
 
-In such a scenario, the video encoder produces frames "blindly" without real knowledge of what state the remote receiver is in. Using recovery mechanisms such as retransmission, forward error correction and fast-forwarding past skippable frames the receiver is assumed to be able to decode the video. In some cases those methods may not be enough, requiring keyframe requests to be sent as a last resort.
+In such a scenario, the video encoder produces frames "blindly" without real knowledge of what state the remote receiver is in. Using recovery mechanisms such as retransmission, forward error correction and fast-forwarding past skippable frames, the receiver is assumed to be able to decode the video. In some cases those methods may not be enough, requiring keyframe requests to be sent as a last resort.
 
-On the other hand, if the encoder is able to reason about which frames have been received and decoded it can be more proactive. One way is to store frames that are known to be received so that they can be later used as guaranteed good references in the case of e.g. large loss events, avoiding the need for potentially large retransmissions etc. Collectively this is often referred to as "Long Term Reference" structures or LTR for short, although the exact structure may vary.
+On the other hand, if the encoder is able to reason about which frames have been received and decoded, it can be more proactive. One way is to store frames that are known to be received so that they can be later used as guaranteed good references in the case of e.g. large loss events, avoiding the need for potentially large retransmissions etc. Collectively this is often referred to as "Long Term Reference" structures or LTR for short, although the exact structure may vary.
 
-In order to achieve this the sender must be able to reason about the state of the receiver, necessitating the need for feedback signals. In this document a new RTCP message called "Frame Acknowledgement" is introduced as a codec agnostic feedback message for this purpose. Further, an RTP header extension is introduced that allows the sender to actively request feedback on decoding of the associated frame. This allows the sender to both request quick feedback on frames that are important for latency, and enables resilience against loss of feedback packets.
+In order to achieve this, the sender must be able to reason about the state of the receiver, necessitating feedback signals. In this document, a new RTCP message called "Frame Acknowledgement" is introduced as a codec agnostic feedback message for this purpose. Further, an RTP header extension is introduced that allows the sender to actively request feedback on decoding of the associated frame. This both allows the sender to request quick feedback on frames that are important for latency, and enables resilience against loss of feedback packets.
 
 Additionally, there are situations where the receiver may experience partial or full frame loss that cannot be recovered through retransmission or other means. In such cases, the receiver may wish to skip the unrecoverable frame and move forward, but needs a frame encoded with a reference that has been acknowledged. The Frame Acknowledgement Feedback message provides a mechanism for the receiver to request such resynchronization frames, avoiding the need for a full keyframe and thereby minimizing recovery latency and bandwidth usage.
 
@@ -105,9 +105,9 @@ For the purposes of this document, a "frame" is defined as any decodable unit of
 
 Frame Acknowledgement can be used for video streams in most topologies. It is also designed to be codec agnostic.
 
-In terms of {{?RFC7667}}, Point-to-Point is the most straightforward target as it is easiest to reason about a single receiver. A Media Translator or other systems that include a decoder are similarly easy - from the perspective of the sender the middle box is the receiver.
+In terms of {{?RFC7667}}, Point-to-Point is the most straightforward target as it is easiest to reason about a single receiver. A Media Translator or other systems that include a decoder are similarly easy - from the perspective of the sender, the middlebox is the receiver.
 
-If a Transport Translator is used for Point-to-Multi-Point, then the middlebox must make sure to make valid translations. See section on [Frame ID considerations](#frame_id_considerations) below.
+If a Transport Translator is used for Point-to-Multi-Point, then the middlebox must make sure to make valid translations. See the section on [Frame ID considerations](#frame_id_considerations) below.
 
 # Existing Feedback Formats
 
@@ -117,9 +117,9 @@ NACK, defined in {{?RFC4585}}, provides only requests for packets the receiver i
 
 {{?RFC8888}} and {{TWCC}} provide per-packet acknowledgement and so are more useful. A mapping from packet(s) to frame needs to happen but that is not a big problem. However, even if a frame is confirmed to be received there is no guarantee that it gets decoded.
 
-Reference Picture Selection Indication (RPSI) is another existing message, but it puts the logic of requesting a particular reference frame in the receiver - significantly complicating the system especially in Point-to-Multi-Point systems. It is further codec specific, and several modern codecs lack a specification - including AV1 and H.266. 
+Reference Picture Selection Indication (RPSI) is another existing message, but it puts the logic of requesting a particular reference frame in the receiver - significantly complicating the system, especially in Point-to-Multi-Point systems. It is further codec specific, and several modern codecs lack a specification - including AV1 and H.266.
 
-Loss Notification {{LNTF}} was a proposed RTCP message intended to solve most of these problems, but it lacks resilience against loss of feedback and also cannot handle out-of-order acknowledgements. The latter makes for instance single-SSRC simulcast structures (e.g. SxTx modes in {{SVC}}) impossible.
+Loss Notification {{LNTF}} was a proposed RTCP message intended to solve most of these problems, but it lacks resilience against loss of feedback and also cannot handle out-of-order acknowledgements. The latter makes, for instance, single-SSRC simulcast structures (e.g. SxTx modes in {{SVC}}) impossible.
 
 # Requirements
 
@@ -151,12 +151,12 @@ It SHOULD appear on the last packet of a video frame, and MUST NOT appear more t
 
 ## Frame Identifier {#frame_identifier}
 
-In order to request and receive information about decoded frames, we must be able to identify them. The frame acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is a 16-bit unsigned integer field, that wraps around to 0 on overflow.
+In order to request and receive information about decoded frames, we must be able to identify them. The Frame Acknowledgement header extension may contain a Frame ID field for this purpose. The Frame ID is a 16-bit unsigned integer field that wraps around to 0 on overflow.
 
 ## Frame Acknowledgment Request
 
-In order to get feedback on the state of the remote decoder, the sender actively requests such feedback using the same frame acknowledgement header extension that is also used for frame identification.
-The feedback request comprises a Start Frame ID and Length field. Specifying the range explicitly has several advantages, including reliable delivery of the feedback and the ability to signal state relating to multiple independent streams interleaved within a single SSRC.
+In order to get feedback on the state of the remote decoder, the sender actively requests such feedback using the same Frame Acknowledgement header extension that is also used for frame identification.
+The feedback request comprises a Feedback Start and a Feedback Length field. Specifying the range explicitly has several advantages, including reliable delivery of the feedback and the ability to signal state relating to multiple independent streams interleaved within a single SSRC.
 
 If a new Frame Acknowledgement Request is sent with an incremented Feedback Start, all status values prior to that Frame ID are considered as acknowledged and can be culled by the receiver. A sender MUST NOT request feedback prior to either the last acknowledged Frame ID or the start of the stream.
 
@@ -165,9 +165,9 @@ If a new Frame Acknowledgement Request is sent with an incremented Feedback Star
 This section describes the data layout for the Frame Acknowledgment RTP Header Extension.
 The extension data starts with the FFR/Reserved byte.
 
-For a One-Byte Header (as defined in {{?RFC5285}}, Section 4.2), the `ID` field identifies the extension, and the `len` field is a 4-bit value `N` that indicates the number of data bytes following the `ID` and `len` fields, *minus one*. Thus, the total number of bytes for the extension data is `N+1`.
+For a One-Byte Header (as defined in {{?RFC8285}}, Section 4.2), the `ID` field identifies the extension, and the `len` field is a 4-bit value `N` that indicates the number of data bytes following the `ID` and `len` fields, *minus one*. Thus, the total number of bytes for the extension data is `N+1`.
 
-For a Two-Byte Header (as defined in {{?RFC5285}}, Section 4.3), the `ID` field identifies the extension, and the 8-bit `length` field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).
+For a Two-Byte Header (as defined in {{?RFC8285}}, Section 4.3), the `ID` field identifies the extension, and the 8-bit `length` field indicates the total number of bytes for the extension data (i.e., the FFR/Reserved byte plus any optional fields).
 
 ~~~
  Extension Data:
@@ -193,13 +193,13 @@ For a Two-Byte Header (as defined in {{?RFC5285}}, Section 4.3), the `ID` field 
 This field is located in the first byte of the extension data. It indicates the presence and meaning of the subsequent optional fields. The total number of bytes for the extension data (and thus the value of `N` for the one-byte header's `len` field, or the `length` field for two-byte headers) depends on the FFR value:
 
 *   **00: Frame ID only.**
-    The FFR/Reserved byte is followed by a one-byte Frame ID field.
+    The FFR/Reserved byte is followed by a two-byte Frame ID field.
     Total extension data bytes = 3 (FFR/Reserved + Frame ID).
     For one-byte header: `len` = 2.
     For two-byte header: `length` = 3.
     No feedback is explicitly requested by this header.
 *   **01: Frame ID + implicit feedback request.**
-    The FFR/Reserved byte is followed by a one-byte Frame ID field.
+    The FFR/Reserved byte is followed by a two-byte Frame ID field.
     Total extension data bytes = 3 (FFR/Reserved + Frame ID).
     For one-byte header: `len` = 2.
     For two-byte header: `length` = 3.
@@ -231,7 +231,7 @@ An unsigned integer that indicates the number of consecutive frames the sender i
 
 Note that since the Frame ID and Feedback Start are 16-bit fields that wrap, care must be taken when calculating ranges. For example, a request with Feedback Start = 65534 and Feedback Length = 3 indicates the sender is requesting feedback for frames with Frame IDs 65534, 65535, and 0.
 
-If a sender is not interested in feedback for frames prior to and including a given Frame ID, it can effectively signal this by sending a request (FFR=01, 10, or 10) where the Feedback Start (or Frame ID for FFR=01) is more recent. This implicitly acknowledges prior frames up to the new Feedback Start. Alternatively, a Feedback Length of 0 can be used with FFR=10 if no specific frames need feedback but an acknowledgment point needs to be set.
+If a sender is not interested in feedback for frames prior to and including a given Frame ID, it can effectively signal this by sending a request (FFR=01 or 10) where the Feedback Start (or Frame ID for FFR=01) is more recent. This implicitly acknowledges prior frames up to the new Feedback Start. Alternatively, a Feedback Length of 0 can be used with FFR=10 if no specific frames need feedback but an acknowledgment point needs to be set.
 
 # Frame Acknowledgment Feedback RTCP Message
 
@@ -261,7 +261,7 @@ The flags byte contains the Resync Request Flag and reserved bits for future use
 
 ### Resync Request Flag (1 bit)
 
-The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, Start Frame ID should indicate latest decoded frame ID and status vector containing frames up to the latest received Frame ID assuming length field is less than 256.
+The most significant bit (bit 0) of the flags byte indicates whether the receiver is requesting a resync frame. When set to 1, it indicates that the receiver is requesting a resync frame. When set to 0, acknowledgement is triggered by sender request. If R=1, the Start Frame ID should indicate the latest decoded Frame ID, and the status vector should contain frames up to the latest received Frame ID, assuming the Length field is less than 256.
 
 ### Reserved (7 bits)
 
@@ -275,7 +275,7 @@ The first Frame ID (inclusive) for which feedback is provided in this message. T
 
 An unsigned integer denoting how many consecutive frames, starting from Start Frame ID, this message contains feedback for. The last Frame ID included in the feedback is (Start Frame ID + Length - 1), with wrap-around logic applied to Frame IDs. A Length of 0 indicates no feedback entries are present (e.g., when the requested range has no overlap with the receiver's status window, see [Receiver State Limits](#receiver_state_limits)).
 
-## status vector (variable length)
+## Status Vector (variable length)
 
 A bit vector of the size indicated by the Length field. Each bit corresponds to a Frame ID, starting from Start Frame ID and incrementing by one for each subsequent bit.
 *   A value of **0** indicates the frame has not been received or has not been decoded (or is not expected to be decoded).
@@ -291,11 +291,11 @@ Since feedback is only really necessary for frames which the codec stores in a r
 
 Also note that no exceptions are made for keyframes. I.e. keyframes may or may not be assigned a Frame ID, and any frames preceding a keyframe must still be included in the feedback if requested by the media sender - despite the keyframe being a new recovery point.
 
-The Frame ID sequence (and consequently the feedback messages corresponding to it) is unique per sender/receiver SSRC pair. Thus if a sender or receiver SSRC is changed, a new Frame ID sequence is started and all previous state is discarded. Otherwise no gaps or resets in the Frame ID sequence are allowed.
+The Frame ID sequence (and consequently the feedback messages corresponding to it) is unique per sender/receiver SSRC pair. Thus, if a sender or receiver SSRC is changed, a new Frame ID sequence is started and all previous state is discarded. Otherwise, no gaps or resets in the Frame ID sequence are allowed.
 
 ## Resync Request Handling
 
-When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it MAY send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify status vector from latest decoded Frame ID up to latest received Frame ID.
+When a receiver detects that its decoder state has become out of sync with the encoder (for example, due to an unrecoverable partial frame loss), it MAY send a Frame Acknowledgement Feedback message with the R flag (bit 0) set to 1 and specify a status vector from the latest decoded Frame ID up to the latest received Frame ID.
 
 Upon receiving a resync request, the sender SHOULD:
 1. Verify that the decoded Frame ID corresponds to a frame that is still available in its reference buffer.
@@ -306,16 +306,20 @@ This mechanism allows for efficient recovery from decoder desynchronization with
 
 ## Point-to-Multi-Point
 
-When considering a multi-way application with an SFU/SFM-type relay in the middle, the middlebox may need to do translations/rewriting of Frame IDs such that the outgoing FrameIDs from a middlebox to a receiver still fulfill the requirement that the FrameIDs are incremented by one for each new frame that is marked for feedback. This must be true even if independent video streams for different senders are multiplexed onto the same SSRC. Further the middlebox should typically not acknowledge a frame to a sender unless all active receivers have acknowledged that frame.
+When considering a multi-way application with an SFU/SFM-type relay in the middle, the middlebox may need to do translations/rewriting of Frame IDs such that the outgoing Frame IDs from a middlebox to a receiver still fulfill the requirement that the Frame IDs are incremented by one for each new frame that is marked for feedback. This must be true even if independent video streams for different senders are multiplexed onto the same SSRC. Further, the middlebox should typically not acknowledge a frame to a sender unless all active receivers have acknowledged that frame.
 
-## Using acknowledgement ranges
+## Using Acknowledgement Ranges
 
-The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed the situation gets more complex.
+The feedback request mechanism has the ability to respond with the status of a range of Frame IDs, not just the last decoded Frame ID. If video is encoded as a single dependency chain, then only the last decoded Frame ID would likely be sufficient. However, when spatial scalability such as "simulcast" is employed, the situation gets more complex.
 
 For instance, imagine the following scenario where two independent layers are sent (with the numbers indicating frame timestamps and ID being the Frame IDs):
+
+~~~
 S1: 100 -> 101 (ID = 1) -> 102 -> 103
 S0: 100 -> 101 -> 102 (ID = 2) -> 103
-Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in [Receiver State Limits](#receiver_state_limits) when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.
+~~~
+
+Here, if the feedback for Frame ID 1 is lost, it is not enough to know that some receiver has been able to decode Frame ID 2. It is for this reason that the sender can request feedback starting at Frame ID 1, with a length of two. The receiver should never remove state information about frames prior to the earliest Frame ID it has received a feedback request for, except as described in [Receiver State Limits](#receiver_state_limits) when the receiver's status window is exceeded. This guarantees that the sender is always able to acquire feedback for all frames it has sent.
 
 ## Receiver State Limits {#receiver_state_limits}
 
@@ -333,7 +337,7 @@ A sender SHOULD issue feedback requests regularly and SHOULD NOT allow the numbe
 
 ## Out-of-order Message Handling {#out_of_order_handling}
 
-Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.
+Though rare, it is possible that Frame Acknowledgement Request header extensions are received out of order. This can happen due to, e.g., network reordering, but more likely due to retransmissions or recovery of packets using FEC. Regardless of the cause, if a Frame ID is present, the receiver must store it and the state associated with the frame in this packet. If a feedback request is contained in the header extension, and no feedback request has been processed with a Frame ID larger than those contained in the requested range, the receiver must process the request. Otherwise, the request must be ignored.
 
 # SDP Signaling {#sdp_signaling}
 
@@ -371,7 +375,7 @@ When used in an offer/answer context, inclusion of "a=rtcp-fb:96 frame-acknowled
 
 A receiver that supports sending resync requests (R=1 in the Frame Acknowledgement Feedback message) MAY indicate that it will trigger resync based on decode starvation, and MAY configure the timeout for doing so, using an optional parameter on the "frame-acknowledgement" rtcp-fb attribute.
 
-The "resync-timeout" parameter specifies the time in milliseconds that the receiver will wait for decoding to make progress before sending a resync request. Decode starvation occurs when the receiver cannot advance decoding (e.g., it is blocked waiting for a frame or data that cannot be recovered). If decoding does not make progress for the specified duration, the receiver should send a Frame Acknowledgement Feedback message with the R flag set and a Resync Frame ID referencing the last successfully decoded frame.
+The "resync-timeout" parameter specifies the time in milliseconds that the receiver will wait for decoding to make progress before sending a resync request. Decode starvation occurs when the receiver cannot advance decoding (e.g., it is blocked waiting for a frame or data that cannot be recovered). If decoding does not make progress for the specified duration, the receiver should send a Frame Acknowledgement Feedback message with the R flag set and the Start Frame ID referencing the last successfully decoded frame.
 
 Syntax:
 
@@ -381,7 +385,7 @@ Syntax:
 
 The value "timeout-ms" is an integer in the range 1-65535, representing the timeout in milliseconds. If "resync-timeout" is omitted, the receiver MAY still send resync requests at its discretion (e.g., on unrecoverable loss) but need not use a timeout-based trigger. Inclusion of "resync-timeout" indicates that the receiver supports and shall use timeout-based resync when decode starves for at least the given duration.
 
-Example attribute lines in SDP (Only one of the format must be present per payload type):
+Example attribute lines in SDP (only one of the formats is to be present per payload type):
 
 ~~~
    a=rtcp-fb:96 frame-acknowledgement
@@ -389,7 +393,7 @@ Example attribute lines in SDP (Only one of the format must be present per paylo
    a=rtcp-fb:96 frame-acknowledgement;resync-timeout=500
 ~~~
 
-The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps use-cases to choose how long receiver need to wait before triggering resync request. Media sender can adjust its interval to request frame acknowledgement feedback if "resync-timeout" based resync feedback is supported by receiver. Media sender can avoid sending frequent frame acknowledgement requests depending on the use-case. Additionally sender could consider RTT during handling of resync feedbacks.
+The first format signals support only for Frame Acknowledgement Feedback. The second format additionally signals that the receiver shall trigger resync after 500 ms of decode starvation. "resync-timeout" helps applications choose how long the receiver needs to wait before triggering a resync request. A media sender can adjust its interval for requesting frame acknowledgement feedback if the receiver supports "resync-timeout" based resync feedback. A media sender can avoid sending frequent frame acknowledgement requests, depending on the use case. Additionally, the sender could consider the RTT when handling resync feedback.
 
 ## Status Window Size Signaling {#status_window_size_signaling}
 
@@ -413,9 +417,9 @@ If multiple parameters are present, they are separated by semicolons:
 
 # Security Considerations
 
-The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially in an indirect way which frames the sender sees as important for recovery.
+The messages in this proposal may expose a small amount of data, namely the number of frames that have been sent, and potentially, in an indirect way, which frames the sender sees as important for recovery.
 
-This data should however not pose any significant privacy or security risks.
+This data should, however, not pose any significant privacy or security risks.
 
 ## State Exhaustion
 
@@ -433,7 +437,7 @@ If a receiver receives a new feedback request before it has transmitted a respon
 
 The RTP header extension needs to have a URI identifier assigned by IANA. See {{IANAEXT}}.
 
-The RTCP message uses PT = 205 (RTPFB, Generic RTP Feedback). As of writing, the next available FMT value is 12. A dedicated ID needs to be assigned by IANA. See {{IANARTCP}}.
+The RTCP message uses PT = 205 (RTPFB, Generic RTP Feedback). At the time of writing, the next available FMT value is 12. A dedicated ID needs to be assigned by IANA. See {{IANARTCP}}.
 
 --- back
 
@@ -476,7 +480,7 @@ Media Sender                              Media Receiver
     |                                          |
 ~~~
 
-The Media Receiver decodes all four frames and updates its status vector. On decoding the fourth frame it responds with an RTCP Frame Acknowledgement Feedback message with R=0 (not a resync request), Start Frame ID=0, Length=4, and a status vector of 1111 indicating all four frames were successfully decoded.
+The Media Receiver decodes all four frames and updates its status vector. On decoding the fourth frame, it responds with an RTCP Frame Acknowledgement Feedback message with R=0 (not a resync request), Start Frame ID=0, Length=4, and a status vector of 1111 indicating all four frames were successfully decoded.
 
 The Media Sender now knows that Frame IDs 0-3 are confirmed as decoded and can safely be used as long-term references.
 
@@ -497,8 +501,7 @@ Media Sender                              Media Receiver
 
 Frames at timestamps 400, 500, and 600 are sent without the Frame Acknowledgement extension since the sender does not need feedback for them. The frame at timestamp 700 is marked with Frame ID=4 (incrementing from the last assigned ID) and uses FFR=01 for an implicit feedback request.
 
-On decoding the frame with ID=4 updates its status vector with just one entry for Frame ID=4. It sends feedback with Start Frame ID=4, and implicitly signals that frames prior to ID=4 (Frame IDs 0-3) are no longer being tracked.
-
+On decoding the frame with ID=4, the Media Receiver updates its status vector with just one entry for Frame ID=4. It sends feedback with Start Frame ID=4, and implicitly signals that frames prior to ID=4 (Frame IDs 0-3) are no longer being tracked.
 
 ## Sender-side Recovery From Frame Loss
 {:numbered="false"}
@@ -573,7 +576,7 @@ Upon receiving the resync request (R=1) with status vector 1, the Media Sender:
 3. Since the frame at timestamp 2000 is available, encodes the frame at timestamp 2300 using only the frame at timestamp 2000 as a reference
 4. The frame at timestamp 2300 is marked with Frame ID=21 (incrementing from the last assigned ID of 20) and uses FFR=10 to request feedback to confirm it was decoded
 
-Frames at timestamps 2100 and 2200 are sent without the Frame Acknowledgement extension since the sender does not need feedback for them. The frame at timestamp 2200 arrives but cannot be decoded since it references the frame at timestamp 2100. The Media Receiver receives the frame at timestamp 2300 (assigned Frame ID=21) and can decode it successfully since it only references the frame at timestamp 2000 (Frame ID 20). The decoder is back in sync, and the receiver sends acknowledgement with R=0, Start Frame ID=20, Length=2, and status vector=11 (Frame IDs 20 and 21 decoded).
+Frames at timestamps 2100 and 2200 are sent without the Frame Acknowledgement extension since the sender does not need feedback for them. The frame at timestamp 2200 arrives but cannot be decoded since it references the frame at timestamp 2100. The Media Receiver receives the frame at timestamp 2300 (assigned Frame ID=21) and can decode it successfully since it only references the frame at timestamp 2000 (Frame ID 20). The decoder is back in sync, and the receiver sends an acknowledgement with R=0, Start Frame ID=20, Length=2, and status vector=11 (Frame IDs 20 and 21 decoded).
 
 If the Media Sender no longer had the frame at timestamp 2000 available in its reference buffer, it would instead encode and send a keyframe (IDR frame) to allow the receiver to resynchronize.
 
